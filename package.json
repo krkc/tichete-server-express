@@ -1,0 +1,47 @@
+{
+  "name": "my-server",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "tsc && node dist/app/app.js",
+    "dev": "./node_modules/.bin/tsc-watch --onSuccess \"node .\"",
+    "lint": "tslint -c tslint.json 'app/**/*.ts'"
+  },
+  "dependencies": {
+    "bcrypt": "^4.0.0",
+    "cookie-parser": "^1.4.4",
+    "debug": "~2.6.9",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-jwt": "^5.3.1",
+    "express-session": "^1.17.0",
+    "express-validator": "^6.4.0",
+    "morgan": "~1.9.1",
+    "mysql2": "^2.1.0",
+    "passport": "^0.4.1",
+    "passport-jwt": "^4.0.0",
+    "passport-local": "^1.0.0",
+    "sequelize": "^5.21.5",
+    "walker": "^1.0.7"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^3.0.0",
+    "@types/cookie-parser": "^1.4.2",
+    "@types/debug": "^4.1.5",
+    "@types/dotenv": "^8.2.0",
+    "@types/express": "^4.17.2",
+    "@types/express-session": "^1.17.0",
+    "@types/morgan": "^1.7.37",
+    "@types/passport": "^1.0.2",
+    "@types/passport-jwt": "^3.0.3",
+    "@types/passport-local": "^1.0.33",
+    "@types/sequelize": "^4.28.8",
+    "sequelize-cli": "^5.5.1",
+    "tsc-watch": "^4.1.0",
+    "tslint": "^6.0.0",
+    "typescript": "^3.8.2"
+  },
+  "description": "Generic node express app",
+  "main": "dist/app/app.js",
+  "license": "GPLv3"
+}

@@ -1,3 +1,3 @@
-# My Backend App
+# Tichete Server
 
-## A minimal backend app with user auth
+## Backend server for the tichete ticket system

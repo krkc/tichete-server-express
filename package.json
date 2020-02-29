@@ -1,5 +1,5 @@
 {
-  "name": "my-server",
+  "name": "tichete-server",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -41,7 +41,7 @@
     "tslint": "^6.0.0",
     "typescript": "^3.8.2"
   },
-  "description": "Generic node express app",
+  "description": "Backend server for tichete ticket system",
   "main": "dist/app/app.js",
   "license": "GPLv3"
 }

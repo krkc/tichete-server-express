@@ -1,4 +1,4 @@
-import { Sequelize, Options } from "sequelize";
+import { Sequelize, SequelizeOptions } from "sequelize-typescript";
 import * as path from "path";
 const walker = require("walker");
 
@@ -8,7 +8,7 @@ import { Schema } from "./schemas/schema";
 export class Database {
     public readonly sequelize: Sequelize;
     private static instance: Database;
-    private config: Options;
+    private config: SequelizeOptions;
 
     private constructor() {
         const env = process.env.APP_ENV || 'development';
@@ -33,7 +33,7 @@ export class Database {
 
     private TestConnection() {
         this.sequelize.authenticate()
-            .catch((err) => {
+            .catch((err: any) => {
                 throw new Error(`Unable to connect to the database: ${err}`);
             });
     }

@@ -1,17 +1,18 @@
-import { Model } from 'sequelize';
-
+import { Table, Column, Model } from 'sequelize-typescript';
 import * as bcrypt from "bcrypt";
 
-export class User extends Model {
-    public id!: number;
+@Table
+export class User extends Model<User> {
+    @Column
     public firstName!: string | null;
+    @Column
     public lastName!: string | null;
+    @Column
     public username!: string;
+    @Column
     public email!: string;
+    @Column
     public password!: string;
-
-    public readonly createdAt!: Date;
-    public readonly updatedAt!: Date;
 
     /**
      * Gets a password's hash.

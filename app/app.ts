@@ -22,7 +22,7 @@ const auth: passport.Authenticator = RoutesLoader.RegisterRoutesAndAuth(app);
 registerMiddleware(app);
 
 // Get port from environment and store in Express.
-const port = normalizePort(process.env.APP_PORT || '3000');
+const port = normalizePort(process.env.PORT || process.env.APP_PORT || '3000');
 app.set('port', port);
 
 /**

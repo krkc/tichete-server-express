@@ -1,18 +1,19 @@
 import { Application } from "express";
 import passport = require("passport");
 
-import { Routes } from ".";
+import { RoutesConfig } from "../base/routes-config";
 import { UsersController } from "../controllers/users";
+import { Database } from "db/database";
 
 
-class UserRoutes implements Routes {
-    public Register(app: Application, authenticator: passport.Authenticator): void {
-        const usersController = new UsersController(authenticator);
+class UserRoutes implements RoutesConfig {
+    public Register(app: Application, db: Database, authenticator: passport.Authenticator): void {
+        const usersController = new UsersController(db, authenticator);
 
-        app.get('/users', usersController.GetMiddleware("Index"), UsersController.Index);
-        app.post('/users', usersController.GetMiddleware("Create"), UsersController.Create);
-        app.patch('/users/:id/edit', usersController.GetMiddleware("Update"), UsersController.Update);
-        app.delete('/users/:id', usersController.GetMiddleware("Delete"), UsersController.Delete);
+        app.get('/users', usersController.GetMiddleware("Index"), usersController.Index);
+        app.post('/users', usersController.GetMiddleware("Create"), usersController.Create);
+        app.patch('/users/:id/edit', usersController.GetMiddleware("Update"), usersController.Update);
+        app.delete('/users/:id', usersController.GetMiddleware("Delete"), usersController.Delete);
     }
 }
 

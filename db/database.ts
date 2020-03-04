@@ -1,18 +1,17 @@
-import { Sequelize, SequelizeOptions } from "sequelize-typescript";
-import * as path from "path";
-const walker = require("walker");
+import { Sequelize, SequelizeOptions, Model, ModelCtor } from "sequelize-typescript";
 
 import configFile from "./config/config.json";
-import { Schema } from "./schemas/schema";
+import modelsImport from "../app/models";
 
 export class Database {
     public readonly sequelize: Sequelize;
     private static instance: Database;
     private config: SequelizeOptions;
 
-    private constructor() {
+    private constructor(models: string[] | ModelCtor<Model<any, any>>[]) {
         const env = process.env.APP_ENV || 'development';
         this.config = (configFile as any)[env];
+        this.config.models = models;
         this.sequelize = new Sequelize(
             this.config.database,
             this.config.username,
@@ -20,43 +19,24 @@ export class Database {
             this.config);
 
         this.TestConnection();
-        this.RegisterModelsAndAssociations();
     }
 
-    public static GetInstance() {
+    public static async GetInstance() {
         if (!this.instance) {
-            this.instance = new Database();
+            this.instance = new Database(await this.GetModels());
         }
 
         return this.instance;
+    }
+
+    private static async GetModels(): Promise<ModelCtor<Model<any, any>>[]> {
+        return await modelsImport;
     }
 
     private TestConnection() {
         this.sequelize.authenticate()
             .catch((err: any) => {
                 throw new Error(`Unable to connect to the database: ${err}`);
-            });
-    }
-
-    private RegisterModelsAndAssociations() {
-        const schemasPath = path.join(__dirname, './schemas');
-        const schemas: Schema[] = [];
-
-        walker(schemasPath)
-            .on('file', (file: any) => {
-                if (!file.match(/(?<!schema)(?:\.js)$/m)) return;
-
-                const schemaModule = require(file).default;
-                const schema: Schema = new schemaModule(this.sequelize);
-                schema.RegisterModel();
-                schemas.push(schema);
-            })
-            .on('error', (er: any, entry: any) => {
-                throw new Error(`Got error ${er} on entry ${entry}`);
-            }).on('end', () => {
-                schemas.forEach((schemaModule) => {
-                    schemaModule.RegisterAssociations();
-                });
             });
     }
 }

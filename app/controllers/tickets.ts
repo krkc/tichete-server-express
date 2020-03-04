@@ -1,13 +1,19 @@
 import { Request, Response, NextFunction } from "express";
 import { check } from "express-validator";
 import passport from "passport";
+import { Repository } from "sequelize-typescript";
 
 import { Controller } from "./controller";
 import { Ticket } from "../models/ticket";
+import { Database } from "db/database";
 
 export class TicketsController extends Controller {
-    constructor(authenticator: passport.Authenticator) {
-        super();
+    private ticketsRepo: Repository<Ticket>;
+
+    constructor(db: Database, authenticator: passport.Authenticator) {
+        super(db);
+        this.ticketsRepo = db.sequelize.getRepository(Ticket);
+
         this.AddValidations(["Create"], [
             check("name", "Please provide a name.").isString(),
         ]);
@@ -16,8 +22,8 @@ export class TicketsController extends Controller {
         // ], [ authenticator.authenticate('jwt') ]);
     }
 
-    public static Index(req: Request, res: Response, next: NextFunction): void {
-        Ticket.findAll()
+    public Index(req: Request, res: Response, next: NextFunction): void {
+        this.ticketsRepo.findAll()
         .then((tickets: Ticket[]) => {
             res.json(tickets);
         }).catch((err: any) => {
@@ -25,10 +31,10 @@ export class TicketsController extends Controller {
         });
     }
 
-    public static Create(req: Request, res: Response, next: NextFunction): void {
+    public Create(req: Request, res: Response, next: NextFunction): void {
         TicketsController.ValidateRequest(req, res);
 
-        Ticket.create({
+        this.ticketsRepo.create({
             name: req.body.name,
             description: req.body.description,
         }).then((ticket: Ticket) => {
@@ -38,8 +44,8 @@ export class TicketsController extends Controller {
         });
     }
 
-    public static Update(req: Request, res: Response, next: NextFunction): void {
-        Ticket.findOne().then((ticket: Ticket) => {
+    public Update(req: Request, res: Response, next: NextFunction): void {
+        this.ticketsRepo.findOne().then((ticket: Ticket) => {
             ticket.name = "";
             ticket.save()
                 .then(() => res.status(200))
@@ -49,8 +55,8 @@ export class TicketsController extends Controller {
         });
     }
 
-    public static Delete(req: Request, res: Response, next: NextFunction): void {
-        Ticket.findOne().then((ticket: Ticket) => {
+    public Delete(req: Request, res: Response, next: NextFunction): void {
+        this.ticketsRepo.findOne().then((ticket: Ticket) => {
             ticket.destroy()
                 .then(() => res.status(200))
                 .catch((err) => {

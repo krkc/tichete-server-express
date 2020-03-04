@@ -1,8 +1,12 @@
 import { Request, Response } from "express";
 import { ValidationChain, validationResult } from "express-validator";
 
+import { Database } from "db/database";
+
 export abstract class Controller {
     protected Middleware: any = { Validations: {}, Authentication: {} };
+
+    constructor(protected db: Database) { }
 
     /**
      * Gets any middleware for a given route.

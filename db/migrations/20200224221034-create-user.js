@@ -1,19 +1,47 @@
 // npx sequelize-cli model:generate --name User --attributes firstName:string,lastName:string,email:string
 // npx sequelize-cli db:migrate
 
-const UserSchema = require("../../dist/db/schemas/users").default;
-
 ("use strict");
 module.exports = {
     up: (queryInterface, Sequelize) => {
-        const userSchema = new UserSchema(Sequelize);
-        return queryInterface.createTable(
-            userSchema.TableName,
-            userSchema.SchemaInfo
-        );
+        return queryInterface.createTable("Users", {
+            id: {
+                type: Sequelize.DataTypes.INTEGER.UNSIGNED,
+                allowNull: false,
+                autoIncrement: true,
+                primaryKey: true
+            },
+            firstName: {
+                type: new Sequelize.DataTypes.STRING(128),
+                allowNull: true
+            },
+            lastName: {
+                type: new Sequelize.DataTypes.STRING(128),
+                allowNull: true
+            },
+            username: {
+                type: new Sequelize.DataTypes.STRING(128),
+                allowNull: false
+            },
+            email: {
+                type: new Sequelize.DataTypes.STRING(128),
+                allowNull: false
+            },
+            password: {
+                type: new Sequelize.DataTypes.STRING(128),
+                allowNull: false
+            },
+            createdAt: {
+                allowNull: false,
+                type: Sequelize.DataTypes.DATE
+            },
+            updatedAt: {
+                allowNull: false,
+                type: Sequelize.DataTypes.DATE
+            }
+        });
     },
     down: (queryInterface, Sequelize) => {
-        const userSchema = new UserSchema(Sequelize);
-        return queryInterface.dropTable(userSchema.TableName);
+        return queryInterface.dropTable("Users");
     }
 };

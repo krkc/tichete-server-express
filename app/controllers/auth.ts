@@ -4,10 +4,16 @@ import passport from "passport";
 
 import { Controller } from "./controller";
 import { User } from "../models/user"
+import { Database } from "db/database";
+import { Repository } from "sequelize-typescript";
 
 export class AuthController extends Controller {
-    constructor(authenticator: passport.Authenticator) {
-        super();
+    private usersRepo: Repository<User>;
+
+    constructor(db: Database, authenticator: passport.Authenticator) {
+        super(db);
+        this.usersRepo = db.sequelize.getRepository(User);
+
         const passwordLength = 4;
         this.AddValidations(["Register"], [
             check("username", "Please provide a username.").isString(),
@@ -28,12 +34,12 @@ export class AuthController extends Controller {
         ], [ authenticator.authenticate('jwt') ]);
     }
 
-    public static Register(req: Request, res: Response, next: NextFunction): void {
+    public Register(req: Request, res: Response, next: NextFunction): void {
         AuthController.ValidateRequest(req, res);
 
         User.hashPassword(req.body.password)
         .then((hashedPassword: string) => {
-            User.create({
+            this.usersRepo.create({
                 username: req.body.username,
                 email: req.body.email,
                 password: hashedPassword,
@@ -48,19 +54,19 @@ export class AuthController extends Controller {
         });
     }
 
-    public static Login(req: Request, res: Response, next: NextFunction): void {
+    public Login(req: Request, res: Response, next: NextFunction): void {
         AuthController.ValidateRequest(req, res);
 
         throw new Error("Not implemented");
     }
 
-    public static Request(req: Request, res: Response, next: NextFunction): void {
+    public Request(req: Request, res: Response, next: NextFunction): void {
         AuthController.ValidateRequest(req, res);
 
         throw new Error("Not implemented");
     }
 
-    public static Reset(req: Request, res: Response, next: NextFunction): void {
+    public Reset(req: Request, res: Response, next: NextFunction): void {
         AuthController.ValidateRequest(req, res);
 
         throw new Error("Not implemented");

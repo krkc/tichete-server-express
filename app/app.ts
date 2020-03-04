@@ -11,29 +11,29 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import { Database } from "../db/database";
-import { RoutesLoader } from "./routes/index";
-import passport from "passport";
+import { AppServer } from "./base/app-server";
 
-const app: express.Application = express();
+(async () => {
+    const db: Database = await Database.GetInstance();
+    const appServer: AppServer = await AppServer.GetInstance(db);
 
-Database.GetInstance();
-const auth: passport.Authenticator = RoutesLoader.RegisterRoutesAndAuth(app);
+    registerMiddleware(appServer);
 
-registerMiddleware(app);
+    // Get port from environment and store in Express.
+    const port = normalizePort(process.env.PORT || process.env.APP_PORT || '3000');
+    appServer.ExpressApp.set('port', port);
 
-// Get port from environment and store in Express.
-const port = normalizePort(process.env.PORT || process.env.APP_PORT || '3000');
-app.set('port', port);
+    /**
+     * Create HTTP server.
+     */
+    const server = http.createServer(appServer.ExpressApp);
 
-/**
- * Create HTTP server.
- */
-const server = http.createServer(app);
+    // Listen on provided port, on all network interfaces.
+    server.listen(port);
+    server.on('error', (err) => onError(err, port));
+    server.on('listening', () => onListening(server));
+})();
 
-// Listen on provided port, on all network interfaces.
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
 
 /**
  * Normalize a port into a number, string, or false.
@@ -57,47 +57,47 @@ function normalizePort(val: string) {
 /**
  * Event listener for HTTP server "error" event.
  */
-function onError(error: any): void {
-    if (error.syscall !== 'listen') {
-        throw error;
+function onError(_error: any, _port: any): void {
+    if (_error.syscall !== 'listen') {
+        throw _error;
     }
 
-    const bind = typeof port === 'string'
-        ? 'Pipe ' + port
-        : 'Port ' + port;
+    const bind = typeof _port === 'string'
+        ? 'Pipe ' + _port
+        : 'Port ' + _port;
 
     // handle specific listen errors with friendly messages
-    switch (error.code) {
+    switch (_error.code) {
         case 'EACCES':
             throw new Error(bind + ' requires elevated privileges')
         case 'EADDRINUSE':
             throw new Error(bind + ' is already in use')
         default:
-            throw error;
+            throw _error;
     }
 }
 
 /**
  * Event listener for HTTP server "listening" event.
  */
-function onListening(): void {
-    const addr = server.address();
+function onListening(_server: http.Server): void {
+    const addr = _server.address();
     const bind = typeof addr === 'string'
         ? 'pipe ' + addr
         : 'port ' + addr.port;
     debug('Listening on ' + bind);
 }
 
-function registerMiddleware(_app: express.Application): void {
-    _app.use(logger('dev'));
-    _app.use(express.json());
-    _app.use(express.urlencoded({ extended: false }));
-    _app.use(cookieParser());
-    _app.use(session({
+function registerMiddleware(appServer: AppServer): void {
+    appServer.ExpressApp.use(logger('dev'));
+    appServer.ExpressApp.use(express.json());
+    appServer.ExpressApp.use(express.urlencoded({ extended: false }));
+    appServer.ExpressApp.use(cookieParser());
+    appServer.ExpressApp.use(session({
         secret: 'secret',
         resave: true,
         saveUninitialized: true
     }));
-    _app.use(auth.initialize());
-    _app.use(auth.session());
+    appServer.ExpressApp.use(appServer.Authenticator.initialize());
+    appServer.ExpressApp.use(appServer.Authenticator.session());
 }

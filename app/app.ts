@@ -2,6 +2,7 @@
 
 import express from "express";
 import session from "express-session";
+import ejwt from "express-jwt";
 import http from "http";
 import logger from "morgan";
 import cookieParser from "cookie-parser";
@@ -14,13 +15,14 @@ import { Database } from "../db/database";
 import { AppServer } from "./base/app-server";
 
 (async () => {
-    const db: Database = await Database.GetInstance();
-    const appServer: AppServer = await AppServer.GetInstance(db);
+    const appServer: AppServer = await AppServer.GetInstance(await Database.GetInstance());
 
     registerMiddleware(appServer);
 
+    await appServer.RegisterRoutesAndAuth();
+
     // Get port from environment and store in Express.
-    const port = normalizePort(process.env.PORT || process.env.APP_PORT || '3000');
+    const port = normalizePort(appServer.Config.port);
     appServer.ExpressApp.set('port', port);
 
     /**
@@ -38,8 +40,8 @@ import { AppServer } from "./base/app-server";
 /**
  * Normalize a port into a number, string, or false.
  */
-function normalizePort(val: string) {
-    const numericPort = parseInt(val, 10);
+function normalizePort(val: string | number) {
+    const numericPort = parseInt(val as string, 10);
 
     if (isNaN(numericPort)) {
         // named pipe
@@ -94,10 +96,12 @@ function registerMiddleware(appServer: AppServer): void {
     appServer.ExpressApp.use(express.urlencoded({ extended: false }));
     appServer.ExpressApp.use(cookieParser());
     appServer.ExpressApp.use(session({
-        secret: 'secret',
+        secret: process.env.APP_SESSION_SECRET,
         resave: true,
         saveUninitialized: true
     }));
     appServer.ExpressApp.use(appServer.Authenticator.initialize());
     appServer.ExpressApp.use(appServer.Authenticator.session());
+    // appServer.ExpressApp.use(ejwt({ secret: process.env.APP_JWT_SECRET })
+    //     .unless({ path: appServer.Config.auth.allowedPaths }));
 }

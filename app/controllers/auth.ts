@@ -1,18 +1,19 @@
 import { Request, Response, NextFunction } from "express";
-import { check, CustomValidator } from "express-validator";
-import passport from "passport";
-
-import { Controller } from "./controller";
-import { User } from "../models/user"
-import { Database } from "db/database";
+import jwt, { SignOptions } from "jsonwebtoken";
+import { check, CustomValidator, Meta } from "express-validator";
 import { Repository } from "sequelize-typescript";
+
+import { AppServer } from "app/base/app-server";
+import { Controller } from "./controller";
+
+import { User } from "../models/user";
 
 export class AuthController extends Controller {
     private usersRepo: Repository<User>;
 
-    constructor(db: Database, authenticator: passport.Authenticator) {
-        super(db);
-        this.usersRepo = db.sequelize.getRepository(User);
+    constructor(appServer: AppServer) {
+        super(appServer);
+        this.usersRepo = appServer.Database.sequelize.getRepository(User);
 
         const passwordLength = 4;
         this.AddValidations(["Register"], [
@@ -28,51 +29,49 @@ export class AuthController extends Controller {
         ]);
         this.AddAuthentication([
             "Login"
-        ], [ authenticator.authenticate('local') ]);
+        ], [appServer.Authenticator.authenticate('local')]);
         this.AddAuthentication([
             "Request", "Reset"
-        ], [ authenticator.authenticate('jwt') ]);
+        ], [appServer.Authenticator.authenticate('jwt')]);
     }
 
-    public Register(req: Request, res: Response, next: NextFunction): void {
-        AuthController.ValidateRequest(req, res);
-
+    public Register = (req: Request, res: Response, next: NextFunction): void => {
+        try{AuthController.ValidateRequest(req, res);} catch(e){if (e.errors) return;}
         User.hashPassword(req.body.password)
-        .then((hashedPassword: string) => {
-            this.usersRepo.create({
-                username: req.body.username,
-                email: req.body.email,
-                password: hashedPassword,
-            }).then((user: User) => {
-                res.json(user);
-            }).catch((err: any) => {
+            .then((hashedPassword: string) => {
+                this.usersRepo.create({
+                    username: req.body.username,
+                    email: req.body.email,
+                    password: hashedPassword,
+                }).then((user: User) => {
+                    res.json(jwt.sign({
+                        uid: user.id,
+                        scope: 'admin'
+                    },
+                        this.appServer.Config.auth.secret,
+                        this.appServer.Config.auth.jwtSignOptions as SignOptions));
+                }).catch((err: any) => {
+                    throw new Error(err);
+                });
+            })
+            .catch(err => {
                 throw new Error(err);
             });
-        })
-        .catch(err => {
-            throw new Error(err);
-        });
-    }
+    };
 
-    public Login(req: Request, res: Response, next: NextFunction): void {
-        AuthController.ValidateRequest(req, res);
-
+    public Login = (req: Request, res: Response, next: NextFunction): void => {
         throw new Error("Not implemented");
-    }
+    };
 
-    public Request(req: Request, res: Response, next: NextFunction): void {
-        AuthController.ValidateRequest(req, res);
-
+    public Request = (req: Request, res: Response, next: NextFunction): void => {
         throw new Error("Not implemented");
-    }
+    };
 
-    public Reset(req: Request, res: Response, next: NextFunction): void {
-        AuthController.ValidateRequest(req, res);
-
+    public Reset = (req: Request, res: Response, next: NextFunction): void => {
         throw new Error("Not implemented");
-    }
+    };
 
-    private PasswordValidator: CustomValidator = (value, { req, location, path }) => {
+    private PasswordValidator = (value: any, { req, location, path }: Meta): CustomValidator => {
         if (value !== req.body.password) {
             throw new Error("The passwords you entered don't match.");
         } else {

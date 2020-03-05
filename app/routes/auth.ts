@@ -1,19 +1,15 @@
-import { Application } from "express";
-import passport = require("passport");
-
 import { RoutesConfig } from "../base/routes-config";
 import { AuthController } from "../controllers/auth";
-import { Database } from "db/database";
-
+import { AppServer } from "app/base/app-server";
 
 class AuthRoutes implements RoutesConfig {
-    public Register(app: Application, db: Database, authenticator: passport.Authenticator): void {
-        const authController = new AuthController(db, authenticator);
+    public Register(appServer: AppServer): void {
+        const authController = new AuthController(appServer);
 
-        app.post('/auth/register', authController.GetMiddleware("Register"), authController.Register);
-        app.post('/auth/login', authController.GetMiddleware("Login"), authController.Login);
-        app.post('/auth/request', authController.GetMiddleware("Request"), authController.Request);
-        app.post('/auth/reset', authController.GetMiddleware("Reset"), authController.Reset);
+        appServer.ExpressApp.post('/auth/register', authController.GetMiddleware("Register"), authController.Register);
+        appServer.ExpressApp.post('/auth/login', authController.GetMiddleware("Login"), authController.Login);
+        appServer.ExpressApp.post('/auth/request', authController.GetMiddleware("Request"), authController.Request);
+        appServer.ExpressApp.post('/auth/reset', authController.GetMiddleware("Reset"), authController.Reset);
     }
 }
 

@@ -1,8 +1,5 @@
-import { Application } from "express";
-import passport from "passport";
-
-import { Database } from "db/database";
+import { AppServer } from "./app-server";
 
 export interface RoutesConfig {
-    Register(app: Application, db: Database, authenticator: passport.Authenticator): void;
+    Register(appServer: AppServer): void;
 }

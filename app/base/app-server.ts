@@ -6,11 +6,14 @@ import { RoutesConfig } from "./routes-config";
 import authStrategies from "./auth/strategies";
 import routesConfigs from "../routes";
 import { Database } from "db/database";
+import serverConfig from "../../config/server.config";
 
 export class AppServer {
     private static instance: AppServer;
+    public readonly Config = serverConfig;
 
     constructor(
+        private readonly database: Database,
         private readonly expressApp: Application,
         private readonly authenticator: passport.Authenticator
         ) { }
@@ -19,12 +22,15 @@ export class AppServer {
         if (!this.instance) {
             const auth = await this.GetConfiguredAuth();
             const expressApp: Application = express();
-            await this.RegisterRoutesAndAuth(expressApp, db, auth);
-            this.instance = new AppServer(expressApp, auth);
+            this.instance = new AppServer(db, expressApp, auth);
         }
 
         return this.instance;
     };
+
+    public get Database() : Database {
+        return this.database;
+    }
 
     public get ExpressApp() : Application {
         return this.expressApp;
@@ -51,11 +57,11 @@ export class AppServer {
         return authenticator;
     };
 
-    private static RegisterRoutesAndAuth = async (app: Application, db: Database, auth: passport.Authenticator): Promise<passport.Authenticator> => {
+    public RegisterRoutesAndAuth = async (): Promise<passport.Authenticator> => {
         (await routesConfigs).forEach((routesConfig: RoutesConfig) => {
-            routesConfig.Register(app, db, auth);
+            routesConfig.Register(this);
         });
 
-        return auth;
+        return this.Authenticator;
     }
 }

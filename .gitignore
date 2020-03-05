@@ -64,4 +64,4 @@ typings/
 dist
 
 # Sequelize config file
-db/config/config.json
+config/database.json

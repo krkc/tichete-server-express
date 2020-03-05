@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
 import { ValidationChain, validationResult } from "express-validator";
 
-import { Database } from "db/database";
+import { AppServer } from "app/base/app-server";
 
 export abstract class Controller {
     protected Middleware: any = { Validations: {}, Authentication: {} };
 
-    constructor(protected db: Database) { }
+    constructor(protected appServer: AppServer) { }
 
     /**
      * Gets any middleware for a given route.
@@ -58,6 +58,7 @@ export abstract class Controller {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             res.status(422).json({ errors: errors.array() });
+            throw { errors: errors.array() };
         }
     }
 }

@@ -1,5 +1,9 @@
-import { Table, Column, Model } from 'sequelize-typescript';
+import { Table, Column, Model, BelongsToMany, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import * as bcrypt from "bcrypt";
+
+import { Assignment } from './assignment';
+import { Ticket } from './ticket';
+import { Role } from './role';
 
 @Table
 export class User extends Model<User> {
@@ -13,6 +17,15 @@ export class User extends Model<User> {
     public email!: string;
     @Column
     public password!: string;
+    @ForeignKey(() => Role)
+    @Column
+    roleId!: number;
+
+    @BelongsTo(() => Role)
+    role: Role;
+
+    @BelongsToMany(() => Ticket, () => Assignment)
+    tickets: (Ticket & {Assignment: Assignment})[];
 
     /**
      * Gets a password's hash.

@@ -1,6 +1,6 @@
 import { Sequelize, SequelizeOptions, Model, ModelCtor } from "sequelize-typescript";
 
-import configFile from "./config/config.json";
+import configFile from "../config/database.json";
 import modelsImport from "../app/models";
 
 export class Database {

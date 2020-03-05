@@ -5,17 +5,17 @@ import { Repository } from "sequelize-typescript";
 import { AppServer } from "app/base/app-server";
 import { Controller } from "./controller";
 
-import { Ticket } from "../models/ticket";
+import { Role } from "../models/role";
 
-export class TicketsController extends Controller {
-    private ticketsRepo: Repository<Ticket>;
+export class RolesController extends Controller {
+    private rolesRepo: Repository<Role>;
 
     constructor(appServer: AppServer) {
         super(appServer);
-        this.ticketsRepo = appServer.Database.sequelize.getRepository(Ticket);
+        this.rolesRepo = appServer.Database.sequelize.getRepository(Role);
 
         this.AddValidations(["Create"], [
-            check("name", "Please provide a name.").isString(),
+            check("name", "Please provide a name for the role.").isString(),
         ]);
         // this.AddAuthentication([
         //     "Index", "Create", "Update", "Delete"
@@ -23,30 +23,29 @@ export class TicketsController extends Controller {
     }
 
     public Index = (req: Request, res: Response, next: NextFunction): void => {
-        this.ticketsRepo.findAll()
-        .then((tickets: Ticket[]) => {
-            res.json(tickets);
-        }).catch((err: any) => {
-            throw new Error(err);
-        });
+        this.rolesRepo.findAll()
+            .then((roles: Role[]) => {
+                res.json(roles);
+            }).catch((err: any) => {
+                throw new Error(err);
+            });
     };
 
     public Create = (req: Request, res: Response, next: NextFunction): void => {
-        try{TicketsController.ValidateRequest(req, res);} catch(e){if (e.errors) return;}
-        this.ticketsRepo.create({
+        try{RolesController.ValidateRequest(req, res);} catch(e){if (e.errors) return;}
+        this.rolesRepo.create({
             name: req.body.name,
-            description: req.body.description,
-        }).then((ticket: Ticket) => {
-            res.json(ticket);
+        }).then((role: Role) => {
+            res.json(role);
         }).catch((err: any) => {
             throw new Error(err);
         });
     };
 
     public Update = (req: Request, res: Response, next: NextFunction): void => {
-        this.ticketsRepo.findOne().then((ticket: Ticket) => {
-            ticket.name = "";
-            ticket.save()
+        this.rolesRepo.findOne().then((role: Role) => {
+            role.name = req.body.name;
+            role.save()
                 .then(() => res.status(200))
                 .catch((err: any) => {
                     throw new Error(err);
@@ -55,8 +54,8 @@ export class TicketsController extends Controller {
     };
 
     public Delete = (req: Request, res: Response, next: NextFunction): void => {
-        this.ticketsRepo.findOne().then((ticket: Ticket) => {
-            ticket.destroy()
+        this.rolesRepo.findOne().then((role: Role) => {
+            role.destroy()
                 .then(() => res.status(200))
                 .catch((err) => {
                     throw new Error(err);

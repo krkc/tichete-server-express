@@ -3,7 +3,7 @@
 
 ("use strict");
 module.exports = {
-    up: (queryInterface, Sequelize) => {
+    up: async (queryInterface, Sequelize) => {
         return queryInterface.createTable("Users", {
             id: {
                 type: Sequelize.DataTypes.INTEGER.UNSIGNED,
@@ -41,7 +41,7 @@ module.exports = {
             }
         });
     },
-    down: (queryInterface, Sequelize) => {
+    down: async (queryInterface, Sequelize) => {
         return queryInterface.dropTable("Users");
     }
 };

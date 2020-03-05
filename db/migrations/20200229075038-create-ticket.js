@@ -1,6 +1,6 @@
 "use strict";
 module.exports = {
-    up: (queryInterface, Sequelize) => {
+    up: async (queryInterface, Sequelize) => {
         return queryInterface.createTable("Tickets", {
             id: {
                 type: Sequelize.DataTypes.INTEGER.UNSIGNED,
@@ -26,7 +26,7 @@ module.exports = {
             }
         });
     },
-    down: (queryInterface, Sequelize) => {
+    down: async (queryInterface, Sequelize) => {
         return queryInterface.dropTable("Tickets");
     }
 };

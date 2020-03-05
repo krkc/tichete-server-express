@@ -1,18 +1,19 @@
 import { Request, Response, NextFunction } from "express";
 import { check } from "express-validator";
-import passport from "passport";
-
-import { Controller } from "./controller";
-import { User } from "../models/user";
-import { Database } from "db/database";
+import { Op, FindOptions } from "sequelize";
 import { Repository } from "sequelize-typescript";
+
+import { AppServer } from "app/base/app-server";
+import { Controller } from "./controller";
+
+import { User } from "../models/user";
 
 export class UsersController extends Controller {
     private usersRepo: Repository<User>;
 
-    constructor(db: Database, authenticator: passport.Authenticator) {
-        super(db);
-        this.usersRepo = db.sequelize.getRepository(User);
+    constructor(appServer: AppServer) {
+        super(appServer);
+        this.usersRepo = appServer.Database.sequelize.getRepository(User);
 
         this.AddValidations(["Create"], [
             check("username", "Please provide a username.").isString(),
@@ -20,7 +21,7 @@ export class UsersController extends Controller {
             check("password", "Please provide a password.").isString(),
         ]);
         // this.AddAuthentication([
-        //     "Index", "Create", "Update", "Delete"
+        //     "Index", "Show", "Create", "Update", "Delete", "Search"
         // ], [ authenticator.authenticate('jwt') ]);
     }
 
@@ -33,9 +34,17 @@ export class UsersController extends Controller {
             });
     };
 
-    public Create = (req: Request, res: Response, next: NextFunction): void => {
-        UsersController.ValidateRequest(req, res);
+    public Show = (req: Request, res: Response, next: NextFunction): void => {
+        this.usersRepo.findByPk(req.params.userId)
+            .then((user: User) => {
+                res.json(user);
+            }).catch((err: any) => {
+                throw new Error(err);
+            });
+    };
 
+    public Create = (req: Request, res: Response, next: NextFunction): void => {
+        try{UsersController.ValidateRequest(req, res);} catch(e){if (e.errors) return;}
         User.hashPassword(req.body.password)
             .then((hashedPassword: string) => {
                 this.usersRepo.create({
@@ -54,7 +63,7 @@ export class UsersController extends Controller {
     };
 
     public Update = (req: Request, res: Response, next: NextFunction): void => {
-        this.usersRepo.findOne().then((user: User) => {
+        this.usersRepo.findByPk(req.params.userId).then((user: User) => {
             user.username = req.body.username;
             user.email = req.body.email;
             user.save()
@@ -66,12 +75,31 @@ export class UsersController extends Controller {
     };
 
     public Delete = (req: Request, res: Response, next: NextFunction): void => {
-        this.usersRepo.findOne().then((user: User) => {
+        this.usersRepo.findByPk(req.params.userId).then((user: User) => {
             user.destroy()
                 .then(() => res.status(200))
                 .catch((err) => {
                     throw new Error(err);
                 });
+        });
+    };
+
+    public Search = (req: Request, res: Response, next: NextFunction): void => {
+        this.usersRepo.findAll({
+            limit: 10,
+            where: {
+                [Op.or]: {
+                    firstName: { [Op.like]: `%${req.query.searchTerm}%` },
+                    lastName: { [Op.like]: `%${req.query.searchTerm}%` },
+                    username: { [Op.like]: `%${req.query.searchTerm}%` }
+                }
+            }
+        } as FindOptions)
+        .then(users => {
+          res.json(users);
+        })
+        .catch(err => {
+            throw new Error(err)
         });
     };
 }

@@ -1,13 +1,13 @@
-import { Request, Response, NextFunction } from "express";
-import { check } from "express-validator";
-import { Repository } from "sequelize-typescript";
+import { Request, Response, NextFunction } from 'express';
+import { check } from 'express-validator';
+import { Repository } from 'sequelize-typescript';
 
-import { AppServer } from "app/base/app-server";
-import { Controller } from "./controller";
+import { AppServer } from 'app/base/app-server';
+import { Controller } from './controller';
 
-import { Assignment } from "../models/assignment";
-import { User } from "../models/user";
-import { Ticket } from "../models/ticket";
+import { Assignment } from '../models/assignment';
+import { User } from '../models/user';
+import { Ticket } from '../models/ticket';
 
 export class AssignmentsController extends Controller {
     private assignmentsRepo: Repository<Assignment>;
@@ -20,9 +20,9 @@ export class AssignmentsController extends Controller {
         this.usersRepo = appServer.Database.sequelize.getRepository(User);
         this.ticketsRepo = appServer.Database.sequelize.getRepository(Ticket);
 
-        this.AddValidations(["Create"], [
-            check("userId", "Please provide a user id.").isInt(),
-            check("ticketId", "Please provide a ticket id.").isInt(),
+        this.AddValidations(['Create'], [
+            check('userId', 'Please provide a user id.').isInt(),
+            check('ticketId', 'Please provide a ticket id.').isInt(),
         ]);
         // this.AddAuthentication([
         //     "Index", "Create", "Delete"

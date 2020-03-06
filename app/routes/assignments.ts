@@ -1,6 +1,6 @@
-import { RoutesConfig } from "../base/routes-config";
-import { AssignmentsController } from "../controllers/assignments";
-import { AppServer } from "app/base/app-server";
+import { RoutesConfig } from '../base/routes-config';
+import { AssignmentsController } from '../controllers/assignments';
+import { AppServer } from 'app/base/app-server';
 
 class AssignmentRoutes implements RoutesConfig {
     public Register(appServer: AppServer): void {
@@ -10,7 +10,7 @@ class AssignmentRoutes implements RoutesConfig {
             '/users/:userId/tickets',
             '/tickets/:ticketId/users'
         ],
-            assignmentsController.GetMiddleware("Index"),
+            assignmentsController.GetMiddleware('Index'),
             assignmentsController.Index
         );
 
@@ -18,7 +18,7 @@ class AssignmentRoutes implements RoutesConfig {
             '/users/:userId/tickets/:ticketId',
             '/tickets/:ticketId/users/:userId'
         ],
-            assignmentsController.GetMiddleware("Create"),
+            assignmentsController.GetMiddleware('Create'),
             assignmentsController.Create
         );
 
@@ -26,7 +26,7 @@ class AssignmentRoutes implements RoutesConfig {
             '/users/:userId/assignments/:assignmentId',
             '/tickets/:ticketId/assignments/:assignmentId'
         ],
-            assignmentsController.GetMiddleware("Delete"),
+            assignmentsController.GetMiddleware('Delete'),
             assignmentsController.Delete
         );
     }

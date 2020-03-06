@@ -1,18 +1,18 @@
 #!/usr/bin/env node
 
-import express from "express";
-import session from "express-session";
-import ejwt from "express-jwt";
-import http from "http";
-import logger from "morgan";
-import cookieParser from "cookie-parser";
-import debugFn from "debug";
+import express from 'express';
+import session from 'express-session';
+import ejwt from 'express-jwt';
+import http from 'http';
+import logger from 'morgan';
+import cookieParser from 'cookie-parser';
+import debugFn from 'debug';
 const debug = debugFn('my-server:server')
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 dotenv.config();
 
-import { Database } from "../db/database";
-import { AppServer } from "./base/app-server";
+import { Database } from '../db/database';
+import { AppServer } from './base/app-server';
 
 (async () => {
     const appServer: AppServer = await AppServer.GetInstance(await Database.GetInstance());

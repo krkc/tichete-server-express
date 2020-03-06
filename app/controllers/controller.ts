@@ -1,7 +1,7 @@
-import { Request, Response } from "express";
-import { ValidationChain, validationResult } from "express-validator";
+import { Request, Response } from 'express';
+import { ValidationChain, validationResult } from 'express-validator';
 
-import { AppServer } from "app/base/app-server";
+import { AppServer } from 'app/base/app-server';
 
 export abstract class Controller {
     protected Middleware: any = { Validations: {}, Authentication: {} };

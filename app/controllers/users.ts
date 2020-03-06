@@ -1,12 +1,12 @@
-import { Request, Response, NextFunction } from "express";
-import { check } from "express-validator";
-import { Op, FindOptions } from "sequelize";
-import { Repository } from "sequelize-typescript";
+import { Request, Response, NextFunction } from 'express';
+import { check } from 'express-validator';
+import { Op, FindOptions } from 'sequelize';
+import { Repository } from 'sequelize-typescript';
 
-import { AppServer } from "app/base/app-server";
-import { Controller } from "./controller";
+import { AppServer } from 'app/base/app-server';
+import { Controller } from './controller';
 
-import { User } from "../models/user";
+import { User } from '../models/user';
 
 export class UsersController extends Controller {
     private usersRepo: Repository<User>;
@@ -15,10 +15,10 @@ export class UsersController extends Controller {
         super(appServer);
         this.usersRepo = appServer.Database.sequelize.getRepository(User);
 
-        this.AddValidations(["Create"], [
-            check("username", "Please provide a username.").isString(),
-            check("email", "Please provide a valid email.").isEmail(),
-            check("password", "Please provide a password.").isString(),
+        this.AddValidations(['Create'], [
+            check('username', 'Please provide a username.').isString(),
+            check('email', 'Please provide a valid email.').isEmail(),
+            check('password', 'Please provide a password.').isString(),
         ]);
         // this.AddAuthentication([
         //     "Index", "Show", "Create", "Update", "Delete", "Search"

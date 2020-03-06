@@ -1,12 +1,12 @@
-import express, { Application } from "express";
-import passport, { Passport } from "passport";
+import express, { Application } from 'express';
+import passport, { Passport } from 'passport';
 
-import { AuthStrategy } from "./auth-strategy";
-import { RoutesConfig } from "./routes-config";
-import authStrategies from "./auth/strategies";
-import routesConfigs from "../routes";
-import { Database } from "db/database";
-import serverConfig from "../../config/server.config";
+import { AuthStrategy } from './auth-strategy';
+import { RoutesConfig } from './routes-config';
+import authStrategies from './auth/strategies';
+import routesConfigs from '../routes';
+import { Database } from 'db/database';
+import serverConfig from '../../config/server.config';
 
 export class AppServer {
     private static instance: AppServer;

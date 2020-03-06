@@ -1,8 +1,8 @@
-import { PassportStatic } from "passport";
-import { Strategy, ExtractJwt } from "passport-jwt";
+import { PassportStatic } from 'passport';
+import { Strategy, ExtractJwt } from 'passport-jwt';
 
-import { User } from "../../../models/user";
-import { AuthStrategy } from "app/base/auth-strategy";
+import { User } from '../../../models/user';
+import { AuthStrategy } from 'app/base/auth-strategy';
 
 class JwtAuthStrategy implements AuthStrategy {
     public Register(passport: PassportStatic) {

@@ -1,11 +1,11 @@
-import { Request, Response, NextFunction } from "express";
-import { check } from "express-validator";
-import { Repository } from "sequelize-typescript";
+import { Request, Response, NextFunction } from 'express';
+import { check } from 'express-validator';
+import { Repository } from 'sequelize-typescript';
 
-import { AppServer } from "app/base/app-server";
-import { Controller } from "./controller";
+import { AppServer } from 'app/base/app-server';
+import { Controller } from './controller';
 
-import { Ticket } from "../models/ticket";
+import { Ticket } from '../models/ticket';
 
 export class TicketsController extends Controller {
     private ticketsRepo: Repository<Ticket>;
@@ -14,8 +14,8 @@ export class TicketsController extends Controller {
         super(appServer);
         this.ticketsRepo = appServer.Database.sequelize.getRepository(Ticket);
 
-        this.AddValidations(["Create"], [
-            check("name", "Please provide a name.").isString(),
+        this.AddValidations(['Create'], [
+            check('name', 'Please provide a name.').isString(),
         ]);
         // this.AddAuthentication([
         //     "Index", "Create", "Update", "Delete"
@@ -45,7 +45,7 @@ export class TicketsController extends Controller {
 
     public Update = (req: Request, res: Response, next: NextFunction): void => {
         this.ticketsRepo.findOne().then((ticket: Ticket) => {
-            ticket.name = "";
+            ticket.name = '';
             ticket.save()
                 .then(() => res.status(200))
                 .catch((err: any) => {

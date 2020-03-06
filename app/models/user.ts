@@ -1,5 +1,5 @@
 import { Table, Column, Model, BelongsToMany, ForeignKey, BelongsTo } from 'sequelize-typescript';
-import * as bcrypt from "bcrypt";
+import * as bcrypt from 'bcrypt';
 
 import { Assignment } from './assignment';
 import { Ticket } from './ticket';

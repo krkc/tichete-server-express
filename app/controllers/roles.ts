@@ -1,11 +1,11 @@
-import { Request, Response, NextFunction } from "express";
-import { check } from "express-validator";
-import { Repository } from "sequelize-typescript";
+import { Request, Response, NextFunction } from 'express';
+import { check } from 'express-validator';
+import { Repository } from 'sequelize-typescript';
 
-import { AppServer } from "app/base/app-server";
-import { Controller } from "./controller";
+import { AppServer } from 'app/base/app-server';
+import { Controller } from './controller';
 
-import { Role } from "../models/role";
+import { Role } from '../models/role';
 
 export class RolesController extends Controller {
     private rolesRepo: Repository<Role>;
@@ -14,8 +14,8 @@ export class RolesController extends Controller {
         super(appServer);
         this.rolesRepo = appServer.Database.sequelize.getRepository(Role);
 
-        this.AddValidations(["Create"], [
-            check("name", "Please provide a name for the role.").isString(),
+        this.AddValidations(['Create'], [
+            check('name', 'Please provide a name for the role.').isString(),
         ]);
         // this.AddAuthentication([
         //     "Index", "Create", "Update", "Delete"

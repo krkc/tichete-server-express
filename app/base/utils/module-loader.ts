@@ -8,7 +8,7 @@
 export default async (directoryPath: string) => {
     return new Promise<any[]>(
         (res: any, rej: any): void => {
-            const walker = require("walker");
+            const walker = require('walker');
 
             const modules: any = [];
             walker(directoryPath)

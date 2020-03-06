@@ -1,8 +1,8 @@
-import { PassportStatic } from "passport";
-import { Strategy } from "passport-local";
+import { PassportStatic } from 'passport';
+import { Strategy } from 'passport-local';
 
-import { User } from "../../../models/user";
-import { AuthStrategy } from "app/base/auth-strategy";
+import { User } from '../../../models/user';
+import { AuthStrategy } from 'app/base/auth-strategy';
 
 class LocalAuthStrategy implements AuthStrategy {
     public Register(passport: PassportStatic) {

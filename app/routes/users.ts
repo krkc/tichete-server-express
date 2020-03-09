@@ -1,19 +1,27 @@
+import { Application } from 'express';
+import Database from 'db/database';
 import { RoutesConfig } from '../base/routes-config';
-import { UsersController } from '../controllers/users';
-import { AppServer } from 'app/base/app-server';
+import UsersController from '../controllers/users';
+
+import passport = require('passport');
 
 class UserRoutes implements RoutesConfig {
-    public Register(appServer: AppServer): void {
-        const usersController = new UsersController(appServer);
+    public Register = (
+        expressApp: Application,
+        database: Database,
+        authenticator: passport.Authenticator,
+        configuration: any,
+    ): void => {
+        const usersController = new UsersController(database, authenticator, configuration);
 
-        appServer.ExpressApp.get('/users', usersController.GetMiddleware('Index'), usersController.Index);
-        appServer.ExpressApp.get('/users/:userId', usersController.GetMiddleware('Show'), usersController.Show);
-        appServer.ExpressApp.post('/users', usersController.GetMiddleware('Create'), usersController.Create);
-        appServer.ExpressApp.patch('/users/:userId/edit', usersController.GetMiddleware('Update'), usersController.Update);
-        appServer.ExpressApp.delete('/users/:userId', usersController.GetMiddleware('Delete'), usersController.Delete);
+        expressApp.get('/users', usersController.GetMiddleware('Index'), usersController.Index);
+        expressApp.get('/users/:userId', usersController.GetMiddleware('Show'), usersController.Show);
+        expressApp.post('/users', usersController.GetMiddleware('Create'), usersController.Create);
+        expressApp.patch('/users/:userId/edit', usersController.GetMiddleware('Update'), usersController.Update);
+        expressApp.delete('/users/:userId', usersController.GetMiddleware('Delete'), usersController.Delete);
 
-        appServer.ExpressApp.get('/users/search', usersController.GetMiddleware('Search'), usersController.Search);
-    }
+        expressApp.get('/users/search', usersController.GetMiddleware('Search'), usersController.Search);
+    };
 }
 
 export default new UserRoutes();

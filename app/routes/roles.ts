@@ -1,16 +1,24 @@
+import { Application } from 'express';
+import Database from 'db/database';
+import RolesController from '../controllers/roles';
 import { RoutesConfig } from '../base/routes-config';
-import { RolesController } from '../controllers/roles';
-import { AppServer } from 'app/base/app-server';
+
+import passport = require('passport');
 
 class RoleRoutes implements RoutesConfig {
-    public Register(appServer: AppServer): void {
-        const rolesController = new RolesController(appServer);
+    public Register = (
+        expressApp: Application,
+        database: Database,
+        authenticator: passport.Authenticator,
+        configuration: any,
+    ): void => {
+        const rolesController = new RolesController(database, authenticator, configuration);
 
-        appServer.ExpressApp.get('/roles', rolesController.GetMiddleware('Index'), rolesController.Index);
-        appServer.ExpressApp.post('/roles', rolesController.GetMiddleware('Create'), rolesController.Create);
-        appServer.ExpressApp.patch('/roles/:id/edit', rolesController.GetMiddleware('Update'), rolesController.Update);
-        appServer.ExpressApp.delete('/roles/:id', rolesController.GetMiddleware('Delete'), rolesController.Delete);
-    }
+        expressApp.get('/roles', rolesController.GetMiddleware('Index'), rolesController.Index);
+        expressApp.post('/roles', rolesController.GetMiddleware('Create'), rolesController.Create);
+        expressApp.patch('/roles/:id/edit', rolesController.GetMiddleware('Update'), rolesController.Update);
+        expressApp.delete('/roles/:id', rolesController.GetMiddleware('Delete'), rolesController.Delete);
+    };
 }
 
 export default new RoleRoutes();

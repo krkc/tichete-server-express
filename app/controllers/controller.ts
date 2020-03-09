@@ -1,12 +1,17 @@
 import { Request, Response } from 'express';
 import { ValidationChain, validationResult } from 'express-validator';
 
-import { AppServer } from 'app/base/app-server';
+import Database from 'db/database';
+import passport from 'passport';
 
-export abstract class Controller {
+export default abstract class Controller {
     protected Middleware: any = { Validations: {}, Authentication: {} };
 
-    constructor(protected appServer: AppServer) { }
+    constructor(
+        protected database: Database,
+        protected authenticator: passport.Authenticator,
+        protected configuration: any,
+    ) {}
 
     /**
      * Gets any middleware for a given route.
@@ -14,14 +19,16 @@ export abstract class Controller {
      */
     public GetMiddleware(routeName: string): any[] {
         let middleware: any[] = [];
-        for (const categoryKey in this.Middleware) {
-            if (this.Middleware.hasOwnProperty(categoryKey)) {
-                const category = this.Middleware[categoryKey];
-                if (category[routeName]) {
-                    middleware = middleware.concat(category[routeName]);
-                }
+
+        const categoryKeys = Object.keys(this.Middleware);
+
+        categoryKeys.forEach((categoryKey: string) => {
+            const category = this.Middleware[categoryKey];
+            if (category[routeName]) {
+                middleware = middleware.concat(category[routeName]);
             }
-        }
+        });
+
         return middleware;
     }
 
@@ -31,7 +38,7 @@ export abstract class Controller {
      * @param validationMiddleware Array of validation middleware.
      */
     protected AddValidations(routeNames: string[], validationMiddleware: ValidationChain[]): void {
-        routeNames.forEach((routeName) => {
+        routeNames.forEach((routeName: string) => {
             const routeValidations: ValidationChain[] = this.Middleware.Validations[routeName] || [];
             this.Middleware.Validations[routeName] = routeValidations.concat(validationMiddleware);
         });
@@ -43,7 +50,7 @@ export abstract class Controller {
      * @param authMiddleware Array of validation middleware.
      */
     protected AddAuthentication(routeNames: string[], authMiddleware: any[]): void {
-        routeNames.forEach((routeName) => {
+        routeNames.forEach((routeName: string) => {
             const authValidations: any[] = this.Middleware.Authentication[routeName] || [];
             this.Middleware.Authentication[routeName] = authValidations.concat(authMiddleware);
         });
@@ -58,7 +65,7 @@ export abstract class Controller {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             res.status(422).json({ errors: errors.array() });
-            throw { errors: errors.array() };
+            throw new Error('An input validation error has occurred.');
         }
     }
 }

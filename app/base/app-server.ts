@@ -1,22 +1,23 @@
 import express, { Application } from 'express';
 import passport, { Passport } from 'passport';
 
+import Database from 'db/database';
 import { AuthStrategy } from './auth-strategy';
 import { RoutesConfig } from './routes-config';
 import authStrategies from './auth/strategies';
 import routesConfigs from '../routes';
-import { Database } from 'db/database';
 import serverConfig from '../../config/server.config';
 
-export class AppServer {
+export default class AppServer {
     private static instance: AppServer;
+
     public readonly Config = serverConfig;
 
     constructor(
         private readonly database: Database,
         private readonly expressApp: Application,
-        private readonly authenticator: passport.Authenticator
-        ) { }
+        private readonly authenticator: passport.Authenticator,
+    ) {}
 
     public static async GetInstance(db: Database) {
         if (!this.instance) {
@@ -26,17 +27,17 @@ export class AppServer {
         }
 
         return this.instance;
-    };
+    }
 
-    public get Database() : Database {
+    public get Database(): Database {
         return this.database;
     }
 
-    public get ExpressApp() : Application {
+    public get ExpressApp(): Application {
         return this.expressApp;
     }
 
-    public get Authenticator() : passport.Authenticator {
+    public get Authenticator(): passport.Authenticator {
         return this.authenticator;
     }
 
@@ -59,9 +60,9 @@ export class AppServer {
 
     public RegisterRoutesAndAuth = async (): Promise<passport.Authenticator> => {
         (await routesConfigs).forEach((routesConfig: RoutesConfig) => {
-            routesConfig.Register(this);
+            routesConfig.Register(this.expressApp, this.database, this.authenticator, this.Config);
         });
 
         return this.Authenticator;
-    }
+    };
 }

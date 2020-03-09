@@ -3,20 +3,18 @@ import { Sequelize, SequelizeOptions, Model, ModelCtor } from 'sequelize-typescr
 import configFile from '../config/database.json';
 import modelsImport from '../app/models';
 
-export class Database {
+export default class Database {
     public readonly sequelize: Sequelize;
+
     private static instance: Database;
+
     private config: SequelizeOptions;
 
     private constructor(models: string[] | ModelCtor<Model<any, any>>[]) {
         const env = process.env.APP_ENV || 'development';
         this.config = (configFile as any)[env];
         this.config.models = models;
-        this.sequelize = new Sequelize(
-            this.config.database,
-            this.config.username,
-            this.config.password,
-            this.config);
+        this.sequelize = new Sequelize(this.config.database, this.config.username, this.config.password, this.config);
 
         this.TestConnection();
     }
@@ -30,13 +28,12 @@ export class Database {
     }
 
     private static async GetModels(): Promise<ModelCtor<Model<any, any>>[]> {
-        return await modelsImport;
+        return modelsImport;
     }
 
     private TestConnection() {
-        this.sequelize.authenticate()
-            .catch((err: any) => {
-                throw new Error(`Unable to connect to the database: ${err}`);
-            });
+        this.sequelize.authenticate().catch((err: any) => {
+            throw new Error(`Unable to connect to the database: ${err}`);
+        });
     }
 }

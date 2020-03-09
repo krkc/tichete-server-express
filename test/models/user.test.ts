@@ -16,7 +16,7 @@ describe('testing user password field visibility when converted to json', () => 
 
     beforeAll(() => {
         user.password = 'my-test-password';
-    })
+    });
 
     test('hides password field when converted to json', () => {
         expect(user.toJSON()).not.toHaveProperty(passwordPropertyName);
@@ -40,7 +40,7 @@ describe('testing user password operations', () => {
     });
 
     test('verifies a plaintext password against the stored hashed password', async () => {
-        user.password = hashedPassword
+        user.password = hashedPassword;
         expect(await user.checkPassword(plaintextPassword)).toBe(true);
         expect(await user.checkPassword('wrong-password')).toBe(false);
         try {

@@ -1,21 +1,19 @@
-"use strict";
-
 module.exports = {
-    up: async (queryInterface, Sequelize) => {
-        return queryInterface.createTable("Assignments", {
+    up: async (queryInterface, Sequelize) =>
+        queryInterface.createTable('Assignments', {
             id: {
                 type: Sequelize.DataTypes.INTEGER.UNSIGNED,
                 allowNull: false,
                 autoIncrement: true,
-                primaryKey: true
+                primaryKey: true,
             },
             userId: {
                 type: Sequelize.DataTypes.INTEGER.UNSIGNED,
                 references: {
                     model: {
-                        tableName: "Users",
+                        tableName: 'Users',
                     },
-                    key: "id"
+                    key: 'id',
                 },
                 allowNull: false,
                 onUpdate: 'CASCADE',
@@ -25,9 +23,9 @@ module.exports = {
                 type: Sequelize.DataTypes.INTEGER.UNSIGNED,
                 references: {
                     model: {
-                        tableName: "Tickets",
+                        tableName: 'Tickets',
                     },
-                    key: "id"
+                    key: 'id',
                 },
                 allowNull: false,
                 onUpdate: 'CASCADE',
@@ -35,16 +33,13 @@ module.exports = {
             },
             createdAt: {
                 allowNull: false,
-                type: Sequelize.DataTypes.DATE
+                type: Sequelize.DataTypes.DATE,
             },
             updatedAt: {
                 allowNull: false,
-                type: Sequelize.DataTypes.DATE
-            }
-        });
-    },
+                type: Sequelize.DataTypes.DATE,
+            },
+        }),
 
-    down: async (queryInterface, Sequelize) => {
-        return queryInterface.dropTable("Assignments");
-    }
+    down: async queryInterface => queryInterface.dropTable('Assignments'),
 };

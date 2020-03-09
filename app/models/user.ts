@@ -1,22 +1,28 @@
+/* eslint-disable import/no-cycle */
 import { Table, Column, Model, BelongsToMany, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import * as bcrypt from 'bcrypt';
 
-import { Assignment } from './assignment';
-import { Ticket } from './ticket';
-import { Role } from './role';
+import Assignment from './assignment';
+import Ticket from './ticket';
+import Role from './role';
 
 @Table
-export class User extends Model<User> {
+export default class User extends Model<User> {
     @Column
     public firstName!: string | null;
+
     @Column
     public lastName!: string | null;
+
     @Column
     public username!: string;
+
     @Column
     public email!: string;
+
     @Column
     public password!: string;
+
     @ForeignKey(() => Role)
     @Column
     roleId!: number;
@@ -24,8 +30,11 @@ export class User extends Model<User> {
     @BelongsTo(() => Role)
     role: Role;
 
-    @BelongsToMany(() => Ticket, () => Assignment)
-    tickets: (Ticket & {Assignment: Assignment})[];
+    @BelongsToMany(
+        () => Ticket,
+        () => Assignment,
+    )
+    tickets: (Ticket & { Assignment: Assignment })[];
 
     /**
      * Gets a password's hash.
@@ -45,14 +54,14 @@ export class User extends Model<User> {
 
     // Hide password by default
     public toJSON(): object {
-        const values: any = Object.assign({}, this.get());
+        const values: any = { ...this.get() };
 
         delete values.password;
         return values;
     }
 
     public toJSONWithPassword(): object {
-        const values = Object.assign({}, this.get());
+        const values = { ...this.get() };
 
         return values;
     }

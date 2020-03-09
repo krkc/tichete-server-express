@@ -1,47 +1,43 @@
-// npx sequelize-cli model:generate --name User --attributes firstName:string,lastName:string,email:string
+// npx sequelize-cli model:generate
 // npx sequelize-cli db:migrate
 
-("use strict");
 module.exports = {
-    up: async (queryInterface, Sequelize) => {
-        return queryInterface.createTable("Users", {
+    up: async (queryInterface, Sequelize) =>
+        queryInterface.createTable('Users', {
             id: {
                 type: Sequelize.DataTypes.INTEGER.UNSIGNED,
                 allowNull: false,
                 autoIncrement: true,
-                primaryKey: true
+                primaryKey: true,
             },
             firstName: {
                 type: new Sequelize.DataTypes.STRING(128),
-                allowNull: true
+                allowNull: true,
             },
             lastName: {
                 type: new Sequelize.DataTypes.STRING(128),
-                allowNull: true
+                allowNull: true,
             },
             username: {
                 type: new Sequelize.DataTypes.STRING(128),
-                allowNull: false
+                allowNull: false,
             },
             email: {
                 type: new Sequelize.DataTypes.STRING(128),
-                allowNull: false
+                allowNull: false,
             },
             password: {
                 type: new Sequelize.DataTypes.STRING(128),
-                allowNull: false
+                allowNull: false,
             },
             createdAt: {
                 allowNull: false,
-                type: Sequelize.DataTypes.DATE
+                type: Sequelize.DataTypes.DATE,
             },
             updatedAt: {
                 allowNull: false,
-                type: Sequelize.DataTypes.DATE
-            }
-        });
-    },
-    down: async (queryInterface, Sequelize) => {
-        return queryInterface.dropTable("Users");
-    }
+                type: Sequelize.DataTypes.DATE,
+            },
+        }),
+    down: async queryInterface => queryInterface.dropTable('Users'),
 };

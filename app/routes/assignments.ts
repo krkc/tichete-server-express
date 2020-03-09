@@ -1,35 +1,36 @@
+import passport from 'passport';
+import Database from 'db/database';
+import { Application } from 'express';
 import { RoutesConfig } from '../base/routes-config';
-import { AssignmentsController } from '../controllers/assignments';
-import { AppServer } from 'app/base/app-server';
+import AssignmentsController from '../controllers/assignments';
 
 class AssignmentRoutes implements RoutesConfig {
-    public Register(appServer: AppServer): void {
-        const assignmentsController = new AssignmentsController(appServer);
+    public Register = (
+        expressApp: Application,
+        database: Database,
+        authenticator: passport.Authenticator,
+        configuration: any,
+    ): void => {
+        const assignmentsController = new AssignmentsController(database, authenticator, configuration);
 
-        appServer.ExpressApp.get([
-            '/users/:userId/tickets',
-            '/tickets/:ticketId/users'
-        ],
+        expressApp.get(
+            ['/users/:userId/tickets', '/tickets/:ticketId/users'],
             assignmentsController.GetMiddleware('Index'),
-            assignmentsController.Index
+            assignmentsController.Index,
         );
 
-        appServer.ExpressApp.post([
-            '/users/:userId/tickets/:ticketId',
-            '/tickets/:ticketId/users/:userId'
-        ],
+        expressApp.post(
+            ['/users/:userId/tickets/:ticketId', '/tickets/:ticketId/users/:userId'],
             assignmentsController.GetMiddleware('Create'),
-            assignmentsController.Create
+            assignmentsController.Create,
         );
 
-        appServer.ExpressApp.delete([
-            '/users/:userId/assignments/:assignmentId',
-            '/tickets/:ticketId/assignments/:assignmentId'
-        ],
+        expressApp.delete(
+            ['/users/:userId/assignments/:assignmentId', '/tickets/:ticketId/assignments/:assignmentId'],
             assignmentsController.GetMiddleware('Delete'),
-            assignmentsController.Delete
+            assignmentsController.Delete,
         );
-    }
+    };
 }
 
 export default new AssignmentRoutes();

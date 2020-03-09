@@ -1,17 +1,24 @@
+import { Application } from 'express';
+import Database from 'db/database';
 import { RoutesConfig } from '../base/routes-config';
-import { TicketsController } from '../controllers/tickets';
-import { AppServer } from 'app/base/app-server';
+import TicketsController from '../controllers/tickets';
 
+import passport = require('passport');
 
 class TicketRoutes implements RoutesConfig {
-    public Register(appServer: AppServer): void {
-        const ticketsController = new TicketsController(appServer);
+    public Register = (
+        expressApp: Application,
+        database: Database,
+        authenticator: passport.Authenticator,
+        configuration: any,
+    ): void => {
+        const ticketsController = new TicketsController(database, authenticator, configuration);
 
-        appServer.ExpressApp.get('/tickets', ticketsController.GetMiddleware('Index'), ticketsController.Index);
-        appServer.ExpressApp.post('/tickets', ticketsController.GetMiddleware('Create'), ticketsController.Create);
-        appServer.ExpressApp.patch('/tickets/:id/edit', ticketsController.GetMiddleware('Update'), ticketsController.Update);
-        appServer.ExpressApp.delete('/tickets/:id', ticketsController.GetMiddleware('Delete'), ticketsController.Delete);
-    }
+        expressApp.get('/tickets', ticketsController.GetMiddleware('Index'), ticketsController.Index);
+        expressApp.post('/tickets', ticketsController.GetMiddleware('Create'), ticketsController.Create);
+        expressApp.patch('/tickets/:id/edit', ticketsController.GetMiddleware('Update'), ticketsController.Update);
+        expressApp.delete('/tickets/:id', ticketsController.GetMiddleware('Delete'), ticketsController.Delete);
+    };
 }
 
 export default new TicketRoutes();

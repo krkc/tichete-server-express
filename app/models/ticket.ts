@@ -1,28 +1,33 @@
+/* eslint-disable import/no-cycle */
 import { Table, Column, Model, BelongsToMany } from 'sequelize-typescript';
 
-import { User } from './user';
-import { Assignment } from './assignment';
+import User from './user';
+import Assignment from './assignment';
 
 @Table
-export class Ticket extends Model<Ticket> {
+export default class Ticket extends Model<Ticket> {
     @Column
     public name!: string | null;
+
     @Column
     public description!: string | null;
 
-    @BelongsToMany(() => User, () => Assignment)
+    @BelongsToMany(
+        () => User,
+        () => Assignment,
+    )
     users: User[];
 
     // Hide relationships by default
     public toJSON(): object {
-        const values: any = Object.assign({}, this.get());
+        const values: any = { ...this.get() };
 
         delete values.Assignment;
         return values;
     }
 
     public toJSONWithRelationships(): object {
-        const values = Object.assign({}, this.get());
+        const values = { ...this.get() };
 
         return values;
     }

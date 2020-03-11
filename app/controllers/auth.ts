@@ -75,16 +75,31 @@ export default class AuthController extends Controller {
     };
 
     public Login = (req: Request, res: Response): void => {
-        throw new Error('Not implemented');
+        try {
+            AuthController.ValidateRequest(req, res);
+        } catch (e) {
+            if (e.errors) return;
+        }
+
+        res.json(
+            jwt.sign(
+                {
+                    uid: (<User>req.user).id,
+                    scope: 'admin',
+                },
+                this.configuration.auth.secret,
+                this.configuration.auth.jwtSignOptions as SignOptions,
+            ),
+        );
     };
 
-    public Request = (req: Request, res: Response): void => {
-        throw new Error('Not implemented');
-    };
+    // public Request = (req: Request, res: Response): void => {
+    //     throw new Error('Not implemented');
+    // };
 
-    public Reset = (req: Request, res: Response): void => {
-        throw new Error('Not implemented');
-    };
+    // public Reset = (req: Request, res: Response): void => {
+    //     throw new Error('Not implemented');
+    // };
 
     private PasswordValidator = (value: any, { req }: Meta): CustomValidator => {
         if (value !== req.body.password) {

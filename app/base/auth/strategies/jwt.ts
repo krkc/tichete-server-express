@@ -2,10 +2,12 @@ import { PassportStatic } from 'passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 
 import { AuthStrategy } from 'app/base/auth-strategy';
+import Database from 'db/database';
 import User from '../../../models/user';
 
 class JwtAuthStrategy implements AuthStrategy {
-    public Register = (passport: PassportStatic) => {
+    public Register = (database: Database, passport: PassportStatic) => {
+        const userRepo = database.sequelize.getRepository(User);
         const opts = {
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             secretOrKey: process.env.APP_JWT_SECRET,
@@ -15,7 +17,8 @@ class JwtAuthStrategy implements AuthStrategy {
 
         passport.use(
             new Strategy(opts, (jwtPayload: any, done: (err: any, user: any) => void) => {
-                User.findOne({ where: { id: jwtPayload.sub } })
+                userRepo
+                    .findOne({ where: { id: jwtPayload.sub } })
                     .then((user: User) => {
                         if (user) {
                             return done(null, user);

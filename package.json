@@ -5,7 +5,7 @@
   "scripts": {
     "start": "tsc && node dist/app/app.js",
     "dev": "./node_modules/.bin/tsc-watch --onSuccess \"node .\"",
-    "lint": "eslint .",
+    "lint": "eslint '*/**/*.{js,ts,tsx}'",
     "test": "jest"
   },
   "dependencies": {

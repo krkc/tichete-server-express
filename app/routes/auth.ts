@@ -15,8 +15,8 @@ class AuthRoutes implements RoutesConfig {
 
         expressApp.post('/auth/register', authController.GetMiddleware('Register'), authController.Register);
         expressApp.post('/auth/login', authController.GetMiddleware('Login'), authController.Login);
-        expressApp.post('/auth/request', authController.GetMiddleware('Request'), authController.Request);
-        expressApp.post('/auth/reset', authController.GetMiddleware('Reset'), authController.Reset);
+        // expressApp.post('/auth/request', authController.GetMiddleware('Request'), authController.Request);
+        // expressApp.post('/auth/reset', authController.GetMiddleware('Reset'), authController.Reset);
     };
 }
 

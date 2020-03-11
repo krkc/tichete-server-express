@@ -13,17 +13,16 @@ export default class AppServer {
 
     public readonly Config = serverConfig;
 
-    constructor(
-        private readonly database: Database,
-        private readonly expressApp: Application,
-        private readonly authenticator: passport.Authenticator,
-    ) {}
+    private expressApp: Application;
+
+    constructor(private readonly database: Database, private readonly authenticator: passport.Authenticator) {
+        this.expressApp = express();
+    }
 
     public static async GetInstance(db: Database) {
         if (!this.instance) {
-            const auth = await this.GetConfiguredAuth();
-            const expressApp: Application = express();
-            this.instance = new AppServer(db, expressApp, auth);
+            const auth = await this.GetConfiguredAuth(db);
+            this.instance = new AppServer(db, auth);
         }
 
         return this.instance;
@@ -41,7 +40,7 @@ export default class AppServer {
         return this.authenticator;
     }
 
-    private static GetConfiguredAuth = async (): Promise<passport.Authenticator> => {
+    private static GetConfiguredAuth = async (database: Database): Promise<passport.Authenticator> => {
         const authenticator = new Passport();
         authenticator.serializeUser((user, done) => {
             done(null, user);
@@ -52,7 +51,7 @@ export default class AppServer {
         });
 
         (await authStrategies).forEach((strategy: AuthStrategy) => {
-            strategy.Register(authenticator);
+            strategy.Register(database, authenticator);
         });
 
         return authenticator;

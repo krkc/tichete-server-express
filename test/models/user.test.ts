@@ -1,8 +1,8 @@
 import { Sequelize } from 'sequelize-typescript';
-import { User } from '../../app/models/user';
-import { Role } from '../../app/models/role';
-import { Assignment } from '../../app/models/assignment';
-import { Ticket } from '../../app/models/ticket';
+import User from '../../app/models/user';
+import Role from '../../app/models/role';
+import Assignment from '../../app/models/assignment';
+import Ticket from '../../app/models/ticket';
 
 let user: User;
 
@@ -44,7 +44,7 @@ describe('testing user password operations', () => {
         expect(await user.checkPassword(plaintextPassword)).toBe(true);
         expect(await user.checkPassword('wrong-password')).toBe(false);
         try {
-            await user.checkPassword(null)
+            await user.checkPassword(null);
         } catch (e) {
             expect(e).toBeInstanceOf(Error);
         }

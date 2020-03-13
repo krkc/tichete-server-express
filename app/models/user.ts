@@ -1,10 +1,12 @@
 /* eslint-disable import/no-cycle */
-import { Table, Column, Model, BelongsToMany, ForeignKey, BelongsTo } from 'sequelize-typescript';
+import { Table, Column, Model, BelongsToMany, ForeignKey, BelongsTo, HasMany } from 'sequelize-typescript';
 import * as bcrypt from 'bcrypt';
 
 import Assignment from './assignment';
 import Ticket from './ticket';
 import Role from './role';
+import Subscription from './subscription';
+import TicketCategory from './ticket-category';
 
 @Table
 export default class User extends Model<User> {
@@ -30,11 +32,24 @@ export default class User extends Model<User> {
     @BelongsTo(() => Role)
     role: Role;
 
-    @BelongsToMany(
-        () => Ticket,
-        () => Assignment,
-    )
-    tickets: (Ticket & { Assignment: Assignment })[];
+    @HasMany(() => Ticket)
+    submittedTickets: Ticket[];
+
+    @BelongsToMany(() => Ticket, {
+        through: () => Assignment,
+        foreignKey: 'userId',
+        otherKey: 'ticketId',
+        as: 'assignedTickets',
+    })
+    assignedTickets: (Ticket & { Assignment: Assignment })[];
+
+    @BelongsToMany(() => TicketCategory, {
+        through: () => Subscription,
+        foreignKey: 'userId',
+        otherKey: 'categoryId',
+        as: 'subscriptions',
+    })
+    subscriptions: (TicketCategory & { Subscription: Subscription })[];
 
     /**
      * Gets a password's hash.

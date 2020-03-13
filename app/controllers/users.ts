@@ -26,9 +26,10 @@ export default class UsersController extends Controller {
                 check('password', 'Please provide a password.').isString(),
             ],
         );
-        // this.AddAuthentication([
-        //     "Index", "Show", "Create", "Update", "Delete", "Search"
-        // ], [ authenticator.authenticate('jwt') ]);
+        // this.AddAuthentication(
+        //     ['Index', 'Show', 'Create', 'Update', 'Delete', 'Search'],
+        //     [authenticator.authenticate('jwt')],
+        // );
     }
 
     public Index = (req: Request, res: Response): void => {

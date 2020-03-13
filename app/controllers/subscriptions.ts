@@ -6,28 +6,28 @@ import Database from 'db/database';
 import passport from 'passport';
 import Controller from './controller';
 
-import Assignment from '../models/assignment';
+import Subscription from '../models/subscription';
 import User from '../models/user';
-import Ticket from '../models/ticket';
+import TicketCategory from '../models/ticket-category';
 
-export default class AssignmentsController extends Controller {
-    private assignmentsRepo: Repository<Assignment>;
+export default class SubscriptionsController extends Controller {
+    private subscriptionsRepo: Repository<Subscription>;
 
     private usersRepo: Repository<User>;
 
-    private ticketsRepo: Repository<Ticket>;
+    private categoriesRepo: Repository<TicketCategory>;
 
     constructor(database: Database, authenticator: passport.Authenticator, configuration: any) {
         super(database, authenticator, configuration);
-        this.assignmentsRepo = database.sequelize.getRepository(Assignment);
+        this.subscriptionsRepo = database.sequelize.getRepository(Subscription);
         this.usersRepo = database.sequelize.getRepository(User);
-        this.ticketsRepo = database.sequelize.getRepository(Ticket);
+        this.categoriesRepo = database.sequelize.getRepository(TicketCategory);
 
         this.AddValidations(
             ['Create'],
             [
                 check('userId', 'Please provide a user id.').isInt(),
-                check('ticketId', 'Please provide a ticket id.').isInt(),
+                check('categoryId', 'Please provide a category id.').isInt(),
             ],
         );
         // this.AddAuthentication(['Index', 'Create', 'Delete'], [authenticator.authenticate('jwt')]);
@@ -38,15 +38,15 @@ export default class AssignmentsController extends Controller {
 
         if (req.params.userId) {
             promise = this.usersRepo
-                .findByPk(req.params.userId, { include: ['assignedTickets'] })
-                .then((users: User) => {
-                    res.json(users?.assignedTickets);
+                .findByPk(req.params.userId, { include: [this.categoriesRepo] })
+                .then((user: User) => {
+                    res.json(user?.subscriptions);
                 });
-        } else if (req.params.ticketId) {
-            promise = this.ticketsRepo
-                .findByPk(req.params.ticketId, { include: ['assignees'] })
-                .then((ticket: Ticket) => {
-                    res.json(ticket?.assignees);
+        } else if (req.params.categoryId) {
+            promise = this.categoriesRepo
+                .findByPk(req.params.categoryId, { include: [this.usersRepo] })
+                .then((ticket: TicketCategory) => {
+                    res.json(ticket?.subscribedUsers);
                 });
         }
 
@@ -57,18 +57,18 @@ export default class AssignmentsController extends Controller {
 
     public Create = (req: Request, res: Response): void => {
         try {
-            AssignmentsController.ValidateRequest(req, res);
+            SubscriptionsController.ValidateRequest(req, res);
         } catch (e) {
             if (e.errors) return;
         }
 
-        this.assignmentsRepo
+        this.subscriptionsRepo
             .create({
                 userId: req.params.userId,
-                ticketId: req.params.ticketId,
+                categoryId: req.params.categoryId,
             })
-            .then((assignment: Assignment) => {
-                res.json(assignment);
+            .then((subscription: Subscription) => {
+                res.json(subscription);
             })
             .catch((err: any) => {
                 throw new Error(err);
@@ -76,8 +76,8 @@ export default class AssignmentsController extends Controller {
     };
 
     public Delete = (req: Request, res: Response): void => {
-        this.assignmentsRepo.findByPk(req.params.assignmentId).then((assignment: Assignment) => {
-            assignment
+        this.subscriptionsRepo.findByPk(req.params.subscriptionId).then((subscription: Subscription) => {
+            subscription
                 .destroy()
                 .then(() => res.status(200))
                 .catch((err: string) => {

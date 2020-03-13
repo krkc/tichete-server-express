@@ -1,5 +1,3 @@
-// npx sequelize-cli db:seed:all
-
 const bcrypt = require('bcrypt');
 
 module.exports = {

@@ -14,19 +14,19 @@ class AssignmentRoutes implements RoutesConfig {
         const assignmentsController = new AssignmentsController(database, authenticator, configuration);
 
         expressApp.get(
-            ['/users/:userId/tickets', '/tickets/:ticketId/users'],
+            ['/users/:userId/assigned-tickets', '/tickets/:ticketId/assigned-users'],
             assignmentsController.GetMiddleware('Index'),
             assignmentsController.Index,
         );
 
         expressApp.post(
-            ['/users/:userId/tickets/:ticketId', '/tickets/:ticketId/users/:userId'],
+            ['/users/:userId/assigned-tickets/:ticketId'],
             assignmentsController.GetMiddleware('Create'),
             assignmentsController.Create,
         );
 
         expressApp.delete(
-            ['/users/:userId/assignments/:assignmentId', '/tickets/:ticketId/assignments/:assignmentId'],
+            ['/users/assignments/:assignmentId'],
             assignmentsController.GetMiddleware('Delete'),
             assignmentsController.Delete,
         );

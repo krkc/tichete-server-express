@@ -6,26 +6,28 @@ import { Repository } from 'sequelize-typescript';
 import Database from 'db/database';
 import Controller from './controller';
 
-import Ticket from '../models/ticket';
+import TicketCategory from '../models/ticket-category';
 
 import passport = require('passport');
 
-export default class TicketsController extends Controller {
-    private ticketsRepo: Repository<Ticket>;
+export default class TicketCategoriesController extends Controller {
+    private ticketCategoriesRepo: Repository<TicketCategory>;
 
     constructor(database: Database, authenticator: passport.Authenticator, configuration: any) {
         super(database, authenticator, configuration);
-        this.ticketsRepo = database.sequelize.getRepository(Ticket);
+        this.ticketCategoriesRepo = database.sequelize.getRepository(TicketCategory);
 
-        this.AddValidations(['Create'], [check('name', 'Please provide a name.').isString()]);
-        // this.AddAuthentication(['Index', 'Create', 'Update', 'Delete'], [authenticator.authenticate('jwt')]);
+        this.AddValidations(['Create'], [check('name', 'Please provide a name for the ticket status.').isString()]);
+        // this.AddAuthentication([
+        //     "Index", "Create", "Update", "Delete"
+        // ], [ authenticator.authenticate('jwt') ]);
     }
 
     public Index = (req: Request, res: Response): void => {
-        this.ticketsRepo
+        this.ticketCategoriesRepo
             .findAll()
-            .then((tickets: Ticket[]) => {
-                res.json(tickets);
+            .then((ticketCategories: TicketCategory[]) => {
+                res.json(ticketCategories);
             })
             .catch((err: any) => {
                 throw new Error(err);
@@ -34,17 +36,16 @@ export default class TicketsController extends Controller {
 
     public Create = (req: Request, res: Response): void => {
         try {
-            TicketsController.ValidateRequest(req, res);
+            TicketCategoriesController.ValidateRequest(req, res);
         } catch (e) {
             if (e.errors) return;
         }
-        this.ticketsRepo
+        this.ticketCategoriesRepo
             .create({
                 name: req.body.name,
-                description: req.body.description,
             })
-            .then((ticket: Ticket) => {
-                res.json(ticket);
+            .then((ticketCategory: TicketCategory) => {
+                res.json(ticketCategory);
             })
             .catch((err: any) => {
                 throw new Error(err);
@@ -52,9 +53,9 @@ export default class TicketsController extends Controller {
     };
 
     public Update = (req: Request, res: Response): void => {
-        this.ticketsRepo.findOne().then((ticket: Ticket) => {
-            ticket.name = '';
-            ticket
+        this.ticketCategoriesRepo.findOne().then((ticketCategory: TicketCategory) => {
+            ticketCategory.name = req.body.name;
+            ticketCategory
                 .save()
                 .then(() => res.status(200))
                 .catch((err: any) => {
@@ -64,8 +65,8 @@ export default class TicketsController extends Controller {
     };
 
     public Delete = (req: Request, res: Response): void => {
-        this.ticketsRepo.findOne().then((ticket: Ticket) => {
-            ticket
+        this.ticketCategoriesRepo.findOne().then((ticketCategory: TicketCategory) => {
+            ticketCategory
                 .destroy()
                 .then(() => res.status(200))
                 .catch((err: string) => {

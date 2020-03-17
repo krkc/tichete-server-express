@@ -8,7 +8,7 @@ export default {
         allowedPaths: ['/auth/register', '/auth/login'],
         jwtSignOptions: {
             algorithm: 'HS256',
-            expiresIn: 120,
+            expiresIn: '30m',
         },
     },
 };

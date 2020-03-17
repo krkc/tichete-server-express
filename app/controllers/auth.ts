@@ -2,11 +2,11 @@ import { Request, Response } from 'express';
 import jwt, { SignOptions } from 'jsonwebtoken';
 import { check, CustomValidator, Meta } from 'express-validator';
 import { Repository } from 'sequelize-typescript';
+import passport from 'passport';
+import { Resource } from 'hal';
 
 import Database from 'db/database';
-import passport from 'passport';
 import Controller from './controller';
-
 import User from '../models/user';
 
 export default class AuthController extends Controller {
@@ -31,7 +31,7 @@ export default class AuthController extends Controller {
         this.AddValidations(
             ['Login'],
             [
-                check('username', 'Please enter your username.').isString(),
+                check('username', 'Please enter your username or email.').isString(),
                 check('password', 'Please enter your password.').isString(),
             ],
         );
@@ -80,17 +80,21 @@ export default class AuthController extends Controller {
         } catch (e) {
             if (e.errors) return;
         }
-
-        res.json(
-            jwt.sign(
-                {
-                    uid: (<User>req.user).id,
-                    scope: 'admin',
-                },
-                this.configuration.auth.secret,
-                this.configuration.auth.jwtSignOptions as SignOptions,
-            ),
+        const user = req.user as User;
+        const token = jwt.sign(
+            {
+                uid: user.id,
+                scope: 'admin',
+            },
+            this.configuration.auth.secret,
+            this.configuration.auth.jwtSignOptions as SignOptions,
         );
+        // const userObj = user.toJSON() as any;
+        // userObj.token = token;
+        const authenticationResource = new Resource({ token }, '/auth/login');
+        authenticationResource.link('authenticatedUser', `/users/${user.id}`);
+
+        res.json(authenticationResource);
     };
 
     // public Request = (req: Request, res: Response): void => {

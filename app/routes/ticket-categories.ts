@@ -1,6 +1,6 @@
 import { Application } from 'express';
 import Database from 'db/database';
-import TicketCategoriesController from '../controllers/ticket-statuses';
+import TicketCategoriesController from '../controllers/ticket-categories';
 import { RoutesConfig } from '../base/routes-config';
 
 import passport = require('passport');

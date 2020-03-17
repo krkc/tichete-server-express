@@ -30,7 +30,7 @@ module.exports = {
         for (let i = 1; i <= 5; i += 1) {
             tickets.push({
                 id: i,
-                name: faker.name.jobTitle(),
+                description: faker.lorem.paragraph(),
                 creatorId: 1,
                 statusId: faker.random.number({ min: 1, max: 3 }),
                 createdAt: new Date(),

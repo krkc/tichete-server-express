@@ -5,6 +5,7 @@ import { Op, FindOptions } from 'sequelize';
 import { Repository } from 'sequelize-typescript';
 
 import Database from 'db/database';
+import { Resource } from 'hal';
 import Controller from './controller';
 
 import User from '../models/user';
@@ -43,15 +44,15 @@ export default class UsersController extends Controller {
             });
     };
 
-    public Show = (req: Request, res: Response): void => {
-        this.usersRepo
-            .findByPk(req.params.userId)
-            .then((user: User) => {
-                res.json(user);
-            })
-            .catch((err: any) => {
-                throw new Error(err);
-            });
+    public Show = async (req: Request, res: Response): Promise<void> => {
+        const user: User = await this.usersRepo.findByPk(req.params.userId);
+
+        const userResource = new Resource(user.toJSON(), 'user');
+        userResource.link('submittedTickets', `/tickets?creatorId=${user.id}`);
+        userResource.link('assignedTickets', `/users/${user.id}/assigned-tickets`);
+        userResource.link('subscribedCategories', `/users/${user.id}/subscribed-categories`);
+        userResource.link('subscribedTickets', `/tickets?subscriberId=${user.id}`);
+        res.json(userResource);
     };
 
     public Create = (req: Request, res: Response): void => {

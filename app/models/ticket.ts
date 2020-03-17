@@ -47,7 +47,8 @@ export default class Ticket extends Model<Ticket> {
     public toJSON(): object {
         const values: any = { ...this.get() };
 
-        delete values.Assignment;
+        delete values.assignees;
+        delete values.taggedCategories;
         return values;
     }
 

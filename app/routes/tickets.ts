@@ -15,9 +15,14 @@ class TicketRoutes implements RoutesConfig {
         const ticketsController = new TicketsController(database, authenticator, configuration);
 
         expressApp.get('/tickets', ticketsController.GetMiddleware('Index'), ticketsController.Index);
+        expressApp.get('/tickets/:ticketId', ticketsController.GetMiddleware('Show'), ticketsController.Show);
         expressApp.post('/tickets', ticketsController.GetMiddleware('Create'), ticketsController.Create);
-        expressApp.patch('/tickets/:id/edit', ticketsController.GetMiddleware('Update'), ticketsController.Update);
-        expressApp.delete('/tickets/:id', ticketsController.GetMiddleware('Delete'), ticketsController.Delete);
+        expressApp.patch(
+            '/tickets/:ticketId/edit',
+            ticketsController.GetMiddleware('Update'),
+            ticketsController.Update,
+        );
+        expressApp.delete('/tickets/:ticketId', ticketsController.GetMiddleware('Delete'), ticketsController.Delete);
     };
 }
 

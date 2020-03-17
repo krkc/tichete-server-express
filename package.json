@@ -5,7 +5,7 @@
   "scripts": {
     "start": "tsc && node dist/app/app.js",
     "dev": "./node_modules/.bin/tsc-watch --onSuccess \"node .\"",
-    "lint": "eslint '*/**/*.{js,ts,tsx}'",
+    "lint": "eslint '*/**/*.{js,ts,tsx}' --fix",
     "test": "jest",
     "seed:prod": "sequelize db:seed:all --seeders-path db/seeders/prod",
     "seed:dev": "sequelize db:seed:all --seeders-path db/seeders/dev"
@@ -20,6 +20,7 @@
     "express-session": "^1.17.0",
     "express-validator": "^6.4.0",
     "faker": "^4.1.0",
+    "hal": "^1.2.0",
     "jsonwebtoken": "^8.5.1",
     "morgan": "~1.9.1",
     "mysql2": "^2.1.0",

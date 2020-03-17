@@ -36,9 +36,10 @@ export default class TicketStatusesController extends Controller {
 
     public Create = (req: Request, res: Response): void => {
         try {
-            TicketStatusesController.ValidateRequest(req, res);
-        } catch (e) {
-            if (e.errors) return;
+            TicketStatusesController.ValidateRequest(req);
+        } catch (err) {
+            res.status(422).json(err);
+            return;
         }
         this.ticketStatusesRepo
             .create({
@@ -53,6 +54,12 @@ export default class TicketStatusesController extends Controller {
     };
 
     public Update = (req: Request, res: Response): void => {
+        try {
+            TicketStatusesController.ValidateRequest(req);
+        } catch (err) {
+            res.status(422).json(err);
+            return;
+        }
         this.ticketStatusesRepo.findOne().then((ticketStatus: TicketStatus) => {
             ticketStatus.name = req.body.name;
             ticketStatus

@@ -36,9 +36,10 @@ export default class RolesController extends Controller {
 
     public Create = (req: Request, res: Response): void => {
         try {
-            RolesController.ValidateRequest(req, res);
-        } catch (e) {
-            if (e.errors) return;
+            RolesController.ValidateRequest(req);
+        } catch (err) {
+            res.status(422).json(err);
+            return;
         }
         this.rolesRepo
             .create({
@@ -53,6 +54,12 @@ export default class RolesController extends Controller {
     };
 
     public Update = (req: Request, res: Response): void => {
+        try {
+            RolesController.ValidateRequest(req);
+        } catch (err) {
+            res.status(422).json(err);
+            return;
+        }
         this.rolesRepo.findOne().then((role: Role) => {
             role.name = req.body.name;
             role.save()

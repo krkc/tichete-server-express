@@ -61,11 +61,13 @@ export default abstract class Controller {
      * @param req Route request
      * @param res Route response
      */
-    protected static ValidateRequest(req: Request, res: Response): void {
+    protected static ValidateRequest(req: Request): void {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            res.status(422).json({ errors: errors.array() });
-            throw new Error('An input validation error has occurred.');
+            throw {
+                error: 'Input Validation Error',
+                detail: errors.array()
+            };
         }
     }
 }

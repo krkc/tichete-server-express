@@ -57,9 +57,10 @@ export default class UsersController extends Controller {
 
     public Create = (req: Request, res: Response): void => {
         try {
-            UsersController.ValidateRequest(req, res);
-        } catch (e) {
-            if (e.errors) return;
+            UsersController.ValidateRequest(req);
+        } catch (err) {
+            res.status(422).json(err);
+            return;
         }
         User.hashPassword(req.body.password)
             .then((hashedPassword: string) => {
@@ -82,6 +83,12 @@ export default class UsersController extends Controller {
     };
 
     public Update = (req: Request, res: Response): void => {
+        try {
+            UsersController.ValidateRequest(req);
+        } catch (err) {
+            res.status(422).json(err);
+            return;
+        }
         this.usersRepo.findByPk(req.params.userId).then((user: User) => {
             user.username = req.body.username;
             user.email = req.body.email;
@@ -104,6 +111,12 @@ export default class UsersController extends Controller {
     };
 
     public Search = (req: Request, res: Response): void => {
+        try {
+            UsersController.ValidateRequest(req);
+        } catch (err) {
+            res.status(422).json(err);
+            return;
+        }
         this.usersRepo
             .findAll({
                 limit: 10,

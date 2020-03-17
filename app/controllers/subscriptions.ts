@@ -57,9 +57,10 @@ export default class SubscriptionsController extends Controller {
 
     public Create = (req: Request, res: Response): void => {
         try {
-            SubscriptionsController.ValidateRequest(req, res);
-        } catch (e) {
-            if (e.errors) return;
+            SubscriptionsController.ValidateRequest(req);
+        } catch (err) {
+            res.status(422).json(err);
+            return;
         }
 
         this.subscriptionsRepo

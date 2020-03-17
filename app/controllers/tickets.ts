@@ -108,9 +108,10 @@ export default class TicketsController extends Controller {
 
     public Create = async (req: Request, res: Response): Promise<Ticket> => {
         try {
-            TicketsController.ValidateRequest(req, res);
-        } catch (e) {
-            if (e.errors) return;
+            TicketsController.ValidateRequest(req);
+        } catch (err) {
+            res.status(422).json(err);
+            return;
         }
         const newTicket = await this.ticketsRepo.create({
             description: req.body.description,
@@ -126,6 +127,12 @@ export default class TicketsController extends Controller {
     };
 
     public Update = (req: Request, res: Response): void => {
+        try {
+            TicketsController.ValidateRequest(req);
+        } catch (err) {
+            res.status(422).json(err);
+            return;
+        }
         this.ticketsRepo.findByPk(req.params.ticketId).then((ticket: Ticket) => {
             ticket.name = '';
             ticket

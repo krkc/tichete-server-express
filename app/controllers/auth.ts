@@ -41,9 +41,10 @@ export default class AuthController extends Controller {
 
     public Register = (req: Request, res: Response): void => {
         try {
-            AuthController.ValidateRequest(req, res);
-        } catch (e) {
-            if (e.errors) return;
+            AuthController.ValidateRequest(req);
+        } catch (err) {
+            res.status(422).json(err);
+            return;
         }
         User.hashPassword(req.body.password)
             .then((hashedPassword: string) => {
@@ -76,9 +77,10 @@ export default class AuthController extends Controller {
 
     public Login = (req: Request, res: Response): void => {
         try {
-            AuthController.ValidateRequest(req, res);
-        } catch (e) {
-            if (e.errors) return;
+            AuthController.ValidateRequest(req);
+        } catch (err) {
+            res.status(422).json(err);
+            return;
         }
         const user = req.user as User;
         const token = jwt.sign(

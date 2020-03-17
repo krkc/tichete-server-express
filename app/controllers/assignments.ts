@@ -57,9 +57,10 @@ export default class AssignmentsController extends Controller {
 
     public Create = (req: Request, res: Response): void => {
         try {
-            AssignmentsController.ValidateRequest(req, res);
-        } catch (e) {
-            if (e.errors) return;
+            AssignmentsController.ValidateRequest(req);
+        } catch (err) {
+            res.status(422).json(err);
+            return;
         }
 
         this.assignmentsRepo

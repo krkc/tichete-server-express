@@ -28,14 +28,10 @@ export default class AuthController extends Controller {
                 check('confirmPassword').custom(this.PasswordValidator),
             ],
         );
-        this.AddValidations(
-            ['Login'],
-            [
-                check('username', 'Please enter your username or email.').isString(),
-                check('password', 'Please enter your password.').isString(),
-            ],
-        );
-        this.AddAuthentication(['Login'], [this.authenticator.authenticate('local')]);
+        this.AddAuthentication(['Login'], [this.authenticator.authenticate('local', {
+            failureMessage: 'Missing credentials.',
+            failWithError: true,
+        }), this.handleLoginErrors]);
         this.AddAuthentication(['Request', 'Reset'], [this.authenticator.authenticate('jwt')]);
     }
 
@@ -55,16 +51,18 @@ export default class AuthController extends Controller {
                         password: hashedPassword,
                     })
                     .then((user: User) => {
-                        res.json(
-                            jwt.sign(
-                                {
-                                    uid: user.id,
-                                    scope: 'admin',
-                                },
-                                this.configuration.auth.secret,
-                                this.configuration.auth.jwtSignOptions as SignOptions,
-                            ),
-                        );
+                        req.login(req.user, (err: any) => {
+                            res.json(
+                                jwt.sign(
+                                    {
+                                        uid: user.id,
+                                        scope: 'admin',
+                                    },
+                                    this.configuration.auth.secret,
+                                    this.configuration.auth.jwtSignOptions as SignOptions,
+                                ),
+                            );
+                        });
                     })
                     .catch((err: any) => {
                         throw new Error(err);
@@ -76,12 +74,6 @@ export default class AuthController extends Controller {
     };
 
     public Login = (req: Request, res: Response): void => {
-        try {
-            AuthController.ValidateRequest(req);
-        } catch (err) {
-            res.status(422).json(err);
-            return;
-        }
         const user = req.user as User;
         const token = jwt.sign(
             {
@@ -91,8 +83,6 @@ export default class AuthController extends Controller {
             this.configuration.auth.secret,
             this.configuration.auth.jwtSignOptions as SignOptions,
         );
-        // const userObj = user.toJSON() as any;
-        // userObj.token = token;
         const authenticationResource = new Resource({ token }, '/auth/login');
         authenticationResource.link('authenticatedUser', `/users/${user.id}`);
 
@@ -114,4 +104,15 @@ export default class AuthController extends Controller {
             return value;
         }
     };
+
+    private handleLoginErrors = (err: any, req: Request, res: Response, next: any) => {
+        if (!err) return;
+
+        if (err.status === 400) {
+            err.message = err.message.concat(' - Missing credentials');
+        } else if (err.status === 401) {
+            err.message = err.message.concat(' - Invalid credentials');
+        }
+        throw err;
+    }
 }

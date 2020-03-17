@@ -19,12 +19,16 @@ class LocalAuthStrategy implements AuthStrategy {
                     })
                     .then((user: User) => {
                         if (!user) {
-                            return done(null, false, { message: 'Incorrect username.' });
+                            return done(null, false);
                         }
-                        if (!user.checkPassword(password)) {
-                            return done(null, false, { message: 'Incorrect password.' });
-                        }
-                        return done(null, user);
+
+                        user.checkPassword(password).then((matches) => {
+                            if (matches) {
+                                done(null, user);
+                            } else {
+                                done(null, false);
+                            }
+                        });
                     })
                     .catch((err: string) => {
                         return done(err);

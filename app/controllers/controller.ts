@@ -11,7 +11,7 @@ export default abstract class Controller {
         protected database: Database,
         protected authenticator: passport.Authenticator,
         protected configuration: any,
-    ) {}
+    ) { }
 
     /**
      * Gets any middleware for a given route.

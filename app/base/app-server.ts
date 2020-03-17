@@ -1,4 +1,4 @@
-import express, { Application } from 'express';
+import express, { Application, Request, Response, NextFunction } from 'express';
 import passport, { Passport } from 'passport';
 
 import Database from 'db/database';
@@ -62,6 +62,26 @@ export default class AppServer {
             routesConfig.Register(this.expressApp, this.database, this.authenticator, this.Config);
         });
 
+        this.expressApp.use(this.SendErrorsAsJson);
+
         return this.Authenticator;
     };
+
+    private SendErrorsAsJson = (err: any, req: Request, res: Response, next: NextFunction) => {
+        if (res.headersSent) return next(err);
+
+        const error: any = {
+            error: err.name || err,
+        }
+        if (err.message){
+            error.detail = err.message
+        }
+        res.status(err.status || 500);
+        if (err.status) {
+            res.json(error);
+        } else {
+            res.send();
+            throw err;
+        }
+    }
 }

@@ -41,7 +41,7 @@ export default class TicketsController extends Controller {
         // this.AddAuthentication(['Index', 'Create', 'Update', 'Delete'], [authenticator.authenticate('jwt')]);
     }
 
-    public Index = (req: Request, res: Response): void => {
+    public Index = async (req: Request, res: Response): Promise<void> => {
         const whereOptions: WhereOptions = {};
         if (req.query.creatorId) {
             whereOptions.creatorId = req.query.creatorId;
@@ -58,61 +58,53 @@ export default class TicketsController extends Controller {
             });
         }
 
-        this.ticketsRepo
-            .findAll({
-                where: whereOptions,
-                include: [
-                    {
-                        as: 'taggedCategories',
-                        model: this.categoriesRepo,
-                        include: includeOptions,
-                    },
-                ],
-            })
-            .then((tickets: Ticket[]) => {
-                const ticketsResource = new Resource({}, '/tickets');
-                const ticketsToAdd: Resource[] = [];
-                tickets.forEach(ticket => {
-                    const ticketResource = new Resource({}, `/tickets/${ticket.id}`);
-                    ticketsToAdd.push(ticketResource);
-                });
+        const tickets = await this.ticketsRepo.findAll({
+            where: whereOptions,
+            include: [
+                {
+                    as: 'taggedCategories',
+                    model: this.categoriesRepo,
+                    include: includeOptions,
+                },
+            ],
+        });
 
-                ticketsResource.embed(`ticket`, ticketsToAdd);
-                res.json(ticketsResource);
-            })
-            .catch((err: any) => {
-                throw new Error(err);
-            });
+        const ticketsResource = new Resource({}, '/tickets');
+        const ticketsToAdd: Resource[] = [];
+        tickets.forEach(ticket => {
+            const ticketResource = new Resource({}, `/tickets/${ticket.id}`);
+            ticketsToAdd.push(ticketResource);
+        });
+        ticketsResource.embed(`ticket`, ticketsToAdd);
+
+        res.json(ticketsResource);
     };
 
-    public Show = (req: Request, res: Response): void => {
-        this.ticketsRepo
-            .findByPk(req.params.ticketId, { include: ['taggedCategories'] })
-            .then((ticket: Ticket) => {
-                const ticketResource = new Resource(ticket.toJSON(), `/tickets/${ticket.id}`);
-                ticketResource.link(`taggedCategories`, `/tickets/${ticket.id}/taggedCategories`);
-                ticketResource.link(`assignedUsers`, `/tickets/${ticket.id}/assignedUsers`);
+    public Show = async (req: Request, res: Response): Promise<void> => {
+        const ticket = await this.ticketsRepo.findByPk(
+            req.params.ticketId,
+            { include: ['taggedCategories'] }
+        );
 
-                const categoriesToAdd: Resource[] = [];
-                ticket.taggedCategories.forEach(category => {
-                    const categoryResource = new Resource({}, `/tickets/${ticket.id}/taggedCategories/${category.id}`);
-                    categoriesToAdd.push(categoryResource);
-                });
-                ticketResource.embed(`/tickets/${ticket.id}/taggedCategories`, categoriesToAdd);
-                res.json(ticketResource);
-            })
-            .catch((err: any) => {
-                throw new Error(err);
-            });
+        const ticketUrl = `/tickets/${ticket.id}`;
+        const taggedCategoriesUrl = `${ticketUrl}/tagged-categories`;
+        const ticketResource = new Resource(ticket.toJSON(), ticketUrl);
+        ticketResource.link(`taggedCategories`, taggedCategoriesUrl);
+        ticketResource.link(`assignedUsers`, `${ticketUrl}/assigned-users`);
+
+        const categoriesToAdd: Resource[] = [];
+        ticket.taggedCategories.forEach(category => {
+            const categoryResource = new Resource({}, `${taggedCategoriesUrl}/${category.id}`);
+            categoriesToAdd.push(categoryResource);
+        });
+        ticketResource.embed(taggedCategoriesUrl, categoriesToAdd);
+
+        res.json(ticketResource);
     };
 
-    public Create = async (req: Request, res: Response): Promise<Ticket> => {
-        try {
-            TicketsController.ValidateRequest(req);
-        } catch (err) {
-            res.status(422).json(err);
-            return;
-        }
+    public Create = async (req: Request, res: Response): Promise<void> => {
+        TicketsController.ValidateRequest(req);
+
         const newTicket = await this.ticketsRepo.create({
             description: req.body.description,
         });
@@ -126,32 +118,18 @@ export default class TicketsController extends Controller {
         res.json(newTicket);
     };
 
-    public Update = (req: Request, res: Response): void => {
-        try {
-            TicketsController.ValidateRequest(req);
-        } catch (err) {
-            res.status(422).json(err);
-            return;
-        }
-        this.ticketsRepo.findByPk(req.params.ticketId).then((ticket: Ticket) => {
-            ticket.name = '';
-            ticket
-                .save()
-                .then(() => res.status(200))
-                .catch((err: any) => {
-                    throw new Error(err);
-                });
-        });
+    public Update = async (req: Request, res: Response): Promise<void> => {
+        TicketsController.ValidateRequest(req);
+
+        const ticket = await this.ticketsRepo.findByPk(req.params.ticketId);
+        ticket.name = '';
+        await ticket.save();
+        res.status(200).send();
     };
 
-    public Delete = (req: Request, res: Response): void => {
-        this.ticketsRepo.findByPk(req.params.ticketId).then((ticket: Ticket) => {
-            ticket
-                .destroy()
-                .then(() => res.status(200).send())
-                .catch((err: string) => {
-                    throw new Error(err);
-                });
-        });
+    public Delete = async (req: Request, res: Response): Promise<void> => {
+        const ticket = await this.ticketsRepo.findByPk(req.params.ticketId)
+        ticket.destroy();
+        res.status(200).send();
     };
 }

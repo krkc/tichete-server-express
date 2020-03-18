@@ -33,21 +33,24 @@ export default class UsersController extends Controller {
         // );
     }
 
-    public Index = (req: Request, res: Response): void => {
-        this.usersRepo
-            .findAll()
-            .then((users: User[]) => {
-                res.json(users);
-            })
-            .catch((err: any) => {
-                throw new Error(err);
-            });
+    public Index = async (req: Request, res: Response): Promise<void> => {
+        const users = await this.usersRepo.findAll();
+
+        const usersResource = new Resource({}, '/users');
+        const usersToAdd: Resource[] = [];
+        users.forEach(user => {
+            const userResource = new Resource({}, `/users/${user.id}`);
+            usersToAdd.push(userResource);
+        });
+        usersResource.embed(`user`, usersToAdd);
+
+        res.json(usersResource);
     };
 
     public Show = async (req: Request, res: Response): Promise<void> => {
         const user: User = await this.usersRepo.findByPk(req.params.userId);
 
-        const userResource = new Resource(user.toJSON(), 'user');
+        const userResource = new Resource(user.toJSON(), `/users/${user.id}`);
         userResource.link('submittedTickets', `/tickets?creatorId=${user.id}`);
         userResource.link('assignedTickets', `/users/${user.id}/assigned-tickets`);
         userResource.link('subscribedCategories', `/users/${user.id}/subscribed-categories`);
@@ -55,84 +58,52 @@ export default class UsersController extends Controller {
         res.json(userResource);
     };
 
-    public Create = (req: Request, res: Response): void => {
-        try {
-            UsersController.ValidateRequest(req);
-        } catch (err) {
-            res.status(422).json(err);
-            return;
-        }
-        User.hashPassword(req.body.password)
-            .then((hashedPassword: string) => {
-                this.usersRepo
-                    .create({
-                        username: req.body.username,
-                        email: req.body.email,
-                        password: hashedPassword,
-                    })
-                    .then((user: User) => {
-                        res.json(user);
-                    })
-                    .catch((err: any) => {
-                        throw new Error(err);
-                    });
-            })
-            .catch((err: string) => {
-                throw new Error(err);
-            });
-    };
+    public Create = async (req: Request, res: Response): Promise<void> => {
+        UsersController.ValidateRequest(req);
 
-    public Update = (req: Request, res: Response): void => {
-        try {
-            UsersController.ValidateRequest(req);
-        } catch (err) {
-            res.status(422).json(err);
-            return;
-        }
-        this.usersRepo.findByPk(req.params.userId).then((user: User) => {
-            user.username = req.body.username;
-            user.email = req.body.email;
-            user.save()
-                .then(() => res.status(200))
-                .catch((err: any) => {
-                    throw new Error(err);
-                });
+        const hashedPassword = await User.hashPassword(req.body.password);
+        const user = await this.usersRepo.create({
+            email: req.body.email,
+            username: req.body.username,
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            password: hashedPassword,
         });
+        res.json(user);
     };
 
-    public Delete = (req: Request, res: Response): void => {
-        this.usersRepo.findByPk(req.params.userId).then((user: User) => {
-            user.destroy()
-                .then(() => res.status(200))
-                .catch((err: string) => {
-                    throw new Error(err);
-                });
-        });
+    public Update = async (req: Request, res: Response): Promise<void> => {
+        UsersController.ValidateRequest(req);
+
+        let user = await this.usersRepo.findByPk(req.params.userId)
+        user.username = req.body.username ?? user.username;
+        user.email = req.body.email ?? user.email;
+        user.firstName = req.body.firstName ?? user.firstName;
+        user.lastName = req.body.lastName ?? user.lastName;
+        user.password = req.body.password ?? user.password;
+        user = await user.save();
+        res.json(user);
     };
 
-    public Search = (req: Request, res: Response): void => {
-        try {
-            UsersController.ValidateRequest(req);
-        } catch (err) {
-            res.status(422).json(err);
-            return;
-        }
-        this.usersRepo
-            .findAll({
-                limit: 10,
-                where: {
-                    [Op.or]: {
-                        firstName: { [Op.like]: `%${req.query.searchTerm}%` },
-                        lastName: { [Op.like]: `%${req.query.searchTerm}%` },
-                        username: { [Op.like]: `%${req.query.searchTerm}%` },
-                    },
+    public Delete = async (req: Request, res: Response): Promise<void> => {
+        const user = await this.usersRepo.findByPk(req.params.userId);
+        await user.destroy();
+        res.status(200).send();
+    };
+
+    public Search = async (req: Request, res: Response): Promise<void> => {
+        UsersController.ValidateRequest(req);
+
+        const users = await this.usersRepo.findAll({
+            limit: 10,
+            where: {
+                [Op.or]: {
+                    firstName: { [Op.like]: `%${req.query.searchTerm}%` },
+                    lastName: { [Op.like]: `%${req.query.searchTerm}%` },
+                    username: { [Op.like]: `%${req.query.searchTerm}%` },
                 },
-            } as FindOptions)
-            .then(users => {
-                res.json(users);
-            })
-            .catch(err => {
-                throw new Error(err);
-            });
+            },
+        } as FindOptions);
+        res.json(users);
     };
 }

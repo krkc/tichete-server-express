@@ -76,14 +76,9 @@ export default class AssignmentsController extends Controller {
             });
     };
 
-    public Delete = (req: Request, res: Response): void => {
-        this.assignmentsRepo.findByPk(req.params.assignmentId).then((assignment: Assignment) => {
-            assignment
-                .destroy()
-                .then(() => res.status(200))
-                .catch((err: string) => {
-                    throw new Error(err);
-                });
-        });
+    public Delete = async (req: Request, res: Response): Promise<void> => {
+        const assignment = await this.assignmentsRepo.findByPk(req.params.assignmentId);
+        await assignment.destroy();
+        res.status(200).send();
     };
 }

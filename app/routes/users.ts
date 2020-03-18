@@ -17,7 +17,7 @@ class UserRoutes implements RoutesConfig {
         expressApp.get('/users', usersController.GetMiddleware('Index'), usersController.Index);
         expressApp.get('/users/:userId', usersController.GetMiddleware('Show'), usersController.Show);
         expressApp.post('/users', usersController.GetMiddleware('Create'), usersController.Create);
-        expressApp.patch('/users/:userId/edit', usersController.GetMiddleware('Update'), usersController.Update);
+        expressApp.put('/users/:userId', usersController.GetMiddleware('Update'), usersController.Update);
         expressApp.delete('/users/:userId', usersController.GetMiddleware('Delete'), usersController.Delete);
 
         expressApp.get('/users/search', usersController.GetMiddleware('Search'), usersController.Search);

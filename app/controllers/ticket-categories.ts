@@ -71,14 +71,9 @@ export default class TicketCategoriesController extends Controller {
         });
     };
 
-    public Delete = (req: Request, res: Response): void => {
-        this.ticketCategoriesRepo.findOne().then((ticketCategory: TicketCategory) => {
-            ticketCategory
-                .destroy()
-                .then(() => res.status(200))
-                .catch((err: string) => {
-                    throw new Error(err);
-                });
-        });
+    public Delete = async (req: Request, res: Response): Promise<void> => {
+        const ticketCategory = await this.ticketCategoriesRepo.findByPk(req.params.ticketCategoryId);
+        await ticketCategory.destroy();
+        res.status(200).send();
     };
 }

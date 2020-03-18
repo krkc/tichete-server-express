@@ -66,7 +66,8 @@ export default abstract class Controller {
         if (!errors.isEmpty()) {
             throw {
                 error: 'Input Validation Error',
-                detail: errors.array()
+                detail: errors.array(),
+                status: 422
             };
         }
     }

@@ -76,14 +76,9 @@ export default class SubscriptionsController extends Controller {
             });
     };
 
-    public Delete = (req: Request, res: Response): void => {
-        this.subscriptionsRepo.findByPk(req.params.subscriptionId).then((subscription: Subscription) => {
-            subscription
-                .destroy()
-                .then(() => res.status(200))
-                .catch((err: string) => {
-                    throw new Error(err);
-                });
-        });
+    public Delete = async (req: Request, res: Response): Promise<void> => {
+        const subscription = await this.subscriptionsRepo.findByPk(req.params.subscriptionId);
+        await subscription.destroy();
+        res.status(200).send();
     };
 }

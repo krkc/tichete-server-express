@@ -76,13 +76,9 @@ export default class TagsController extends Controller {
             });
     };
 
-    public Delete = (req: Request, res: Response): void => {
-        this.tagsRepo.findByPk(req.params.tagId).then((tag: Tag) => {
-            tag.destroy()
-                .then(() => res.status(200))
-                .catch((err: string) => {
-                    throw new Error(err);
-                });
-        });
+    public Delete = async (req: Request, res: Response): Promise<void> => {
+        const tag = await this.tagsRepo.findByPk(req.params.tagId);
+        await tag.destroy();
+        res.status(200).send();
     };
 }

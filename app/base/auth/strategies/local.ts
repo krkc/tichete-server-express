@@ -19,10 +19,11 @@ class LocalAuthStrategy implements AuthStrategy {
                     })
                     .then((user: User) => {
                         if (!user) {
-                            return done(null, false);
+                            done(null, false);
+                            return;
                         }
 
-                        user.checkPassword(password).then((matches) => {
+                        user.checkPassword(password).then(matches => {
                             if (matches) {
                                 done(null, user);
                             } else {

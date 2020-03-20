@@ -33,47 +33,26 @@ export default class AssignmentsController extends Controller {
         // this.AddAuthentication(['Index', 'Create', 'Delete'], [authenticator.authenticate('jwt')]);
     }
 
-    public Index = (req: Request, res: Response): void => {
-        let promise: Promise<void>;
-
+    public Index = async (req: Request, res: Response): Promise<void> => {
         if (req.params.userId) {
-            promise = this.usersRepo
-                .findByPk(req.params.userId, { include: ['assignedTickets'] })
-                .then((users: User) => {
-                    res.json(users?.assignedTickets);
-                });
+            const user = await this.usersRepo.findByPk(req.params.userId, { include: ['assignedTickets'] });
+            res.json(user?.assignedTickets);
         } else if (req.params.ticketId) {
-            promise = this.ticketsRepo
-                .findByPk(req.params.ticketId, { include: ['assignees'] })
-                .then((ticket: Ticket) => {
-                    res.json(ticket?.assignees);
-                });
+            const ticket = await this.ticketsRepo.findByPk(req.params.ticketId, {
+                include: ['assignees'],
+            });
+            res.json(ticket?.assignees);
         }
-
-        promise.catch((err: any) => {
-            throw new Error(err);
-        });
     };
 
-    public Create = (req: Request, res: Response): void => {
-        try {
-            AssignmentsController.ValidateRequest(req);
-        } catch (err) {
-            res.status(422).json(err);
-            return;
-        }
+    public Create = async (req: Request, res: Response): Promise<void> => {
+        AssignmentsController.ValidateRequest(req);
 
-        this.assignmentsRepo
-            .create({
-                userId: req.params.userId,
-                ticketId: req.params.ticketId,
-            })
-            .then((assignment: Assignment) => {
-                res.json(assignment);
-            })
-            .catch((err: any) => {
-                throw new Error(err);
-            });
+        const assignment = await this.assignmentsRepo.create({
+            userId: req.params.userId,
+            ticketId: req.params.ticketId,
+        });
+        res.json(assignment);
     };
 
     public Delete = async (req: Request, res: Response): Promise<void> => {

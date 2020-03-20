@@ -15,9 +15,14 @@ class TicketStatusesRoutes implements RoutesConfig {
         const ticketStatusesController = new TicketStatusesController(database, authenticator, configuration);
 
         expressApp.get(
-            '/tickets/statuses',
+            ['/tickets/statuses', '/tickets/:ticketId/statuses'],
             ticketStatusesController.GetMiddleware('Index'),
             ticketStatusesController.Index,
+        );
+        expressApp.get(
+            '/tickets/statuses/:ticketStatusId',
+            ticketStatusesController.GetMiddleware('Show'),
+            ticketStatusesController.Show,
         );
         expressApp.post(
             '/tickets/statuses',
@@ -25,12 +30,12 @@ class TicketStatusesRoutes implements RoutesConfig {
             ticketStatusesController.Create,
         );
         expressApp.patch(
-            '/tickets/statuses/:id/edit',
+            '/tickets/statuses/:ticketStatusId/edit',
             ticketStatusesController.GetMiddleware('Update'),
             ticketStatusesController.Update,
         );
         expressApp.delete(
-            '/tickets/statuses/:id',
+            '/tickets/statuses/:ticketStatusId',
             ticketStatusesController.GetMiddleware('Delete'),
             ticketStatusesController.Delete,
         );

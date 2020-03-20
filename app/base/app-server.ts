@@ -68,13 +68,15 @@ export default class AppServer {
     };
 
     private SendErrorsAsJson = (err: any, req: Request, res: Response, next: NextFunction) => {
-        if (res.headersSent) return next(err);
-
+        if (res.headersSent) {
+            next(err);
+            return;
+        }
         const error: any = {
             error: err.name || err,
-        }
-        if (err.message){
-            error.detail = err.message
+        };
+        if (err.message) {
+            error.detail = err.message;
         }
         res.status(err.status || 500);
         if (err.status) {
@@ -83,5 +85,5 @@ export default class AppServer {
             res.send();
             throw err;
         }
-    }
+    };
 }

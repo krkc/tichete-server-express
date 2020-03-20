@@ -75,7 +75,7 @@ export default class UsersController extends Controller {
     public Update = async (req: Request, res: Response): Promise<void> => {
         UsersController.ValidateRequest(req);
 
-        let user = await this.usersRepo.findByPk(req.params.userId)
+        let user = await this.usersRepo.findByPk(req.params.userId);
         user.username = req.body.username ?? user.username;
         user.email = req.body.email ?? user.email;
         user.firstName = req.body.firstName ?? user.firstName;

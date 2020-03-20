@@ -33,47 +33,28 @@ export default class TagsController extends Controller {
         // this.AddAuthentication(['Index', 'Create', 'Delete'], [authenticator.authenticate('jwt')]);
     }
 
-    public Index = (req: Request, res: Response): void => {
-        let promise: Promise<void>;
-
+    public Index = async (req: Request, res: Response): Promise<void> => {
         if (req.params.ticketId) {
-            promise = this.ticketsRepo
-                .findByPk(req.params.ticketId, { include: [this.ticketCategoriesRepo] })
-                .then((ticket: Ticket) => {
-                    res.json(ticket?.taggedCategories);
-                });
+            const ticket = await this.ticketsRepo.findByPk(req.params.ticketId, {
+                include: [this.ticketCategoriesRepo],
+            });
+            res.json(ticket?.taggedCategories);
         } else if (req.params.categoryId) {
-            promise = this.ticketCategoriesRepo
-                .findByPk(req.params.categoryId, { include: [this.ticketsRepo] })
-                .then((ticketCategory: TicketCategory) => {
-                    res.json(ticketCategory?.taggedTickets);
-                });
+            const ticketCategory = await this.ticketCategoriesRepo.findByPk(req.params.categoryId, {
+                include: [this.ticketsRepo],
+            });
+            res.json(ticketCategory?.taggedTickets);
         }
-
-        promise.catch((err: any) => {
-            throw new Error(err);
-        });
     };
 
-    public Create = (req: Request, res: Response): void => {
-        try {
-            TagsController.ValidateRequest(req);
-        } catch (err) {
-            res.status(422).json(err);
-            return;
-        }
+    public Create = async (req: Request, res: Response): Promise<void> => {
+        TagsController.ValidateRequest(req);
 
-        this.tagsRepo
-            .create({
-                ticketId: req.params.ticketId,
-                categoryId: req.params.categoryId,
-            })
-            .then((tag: Tag) => {
-                res.json(tag);
-            })
-            .catch((err: any) => {
-                throw new Error(err);
-            });
+        const tag = await this.tagsRepo.create({
+            ticketId: req.params.ticketId,
+            categoryId: req.params.categoryId,
+        });
+        res.json(tag);
     };
 
     public Delete = async (req: Request, res: Response): Promise<void> => {

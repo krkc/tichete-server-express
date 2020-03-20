@@ -42,6 +42,8 @@ export default class TicketsController extends Controller {
     }
 
     public Index = async (req: Request, res: Response): Promise<void> => {
+        // TODO: Handle query param '/tickets?categoryIds=1,3,6'
+        // TODO: All these different query options will bloat this controller. Need solution.
         const whereOptions: WhereOptions = {};
         if (req.query.creatorId) {
             whereOptions.creatorId = req.query.creatorId;
@@ -81,10 +83,7 @@ export default class TicketsController extends Controller {
     };
 
     public Show = async (req: Request, res: Response): Promise<void> => {
-        const ticket = await this.ticketsRepo.findByPk(
-            req.params.ticketId,
-            { include: ['taggedCategories'] }
-        );
+        const ticket = await this.ticketsRepo.findByPk(req.params.ticketId, { include: ['taggedCategories'] });
 
         const ticketUrl = `/tickets/${ticket.id}`;
         const taggedCategoriesUrl = `${ticketUrl}/tagged-categories`;
@@ -128,7 +127,7 @@ export default class TicketsController extends Controller {
     };
 
     public Delete = async (req: Request, res: Response): Promise<void> => {
-        const ticket = await this.ticketsRepo.findByPk(req.params.ticketId)
+        const ticket = await this.ticketsRepo.findByPk(req.params.ticketId);
         ticket.destroy();
         res.status(200).send();
     };

@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { ValidationChain, validationResult } from 'express-validator';
 
 import Database from 'db/database';
@@ -11,7 +11,7 @@ export default abstract class Controller {
         protected database: Database,
         protected authenticator: passport.Authenticator,
         protected configuration: any,
-    ) { }
+    ) {}
 
     /**
      * Gets any middleware for a given route.
@@ -64,11 +64,12 @@ export default abstract class Controller {
     protected static ValidateRequest(req: Request): void {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            throw {
+            const errObj = {
                 error: 'Input Validation Error',
                 detail: errors.array(),
-                status: 422
+                status: 422,
             };
+            throw errObj;
         }
     }
 }

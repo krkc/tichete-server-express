@@ -15,13 +15,13 @@ export default class SubscriptionsController extends Controller {
 
     private usersRepo: Repository<User>;
 
-    private categoriesRepo: Repository<TicketCategory>;
+    private ticketCategoriesRepo: Repository<TicketCategory>;
 
     constructor(database: Database, authenticator: passport.Authenticator, configuration: any) {
         super(database, authenticator, configuration);
         this.subscriptionsRepo = database.sequelize.getRepository(Subscription);
         this.usersRepo = database.sequelize.getRepository(User);
-        this.categoriesRepo = database.sequelize.getRepository(TicketCategory);
+        this.ticketCategoriesRepo = database.sequelize.getRepository(TicketCategory);
 
         this.AddValidations(
             ['Create'],
@@ -33,47 +33,26 @@ export default class SubscriptionsController extends Controller {
         // this.AddAuthentication(['Index', 'Create', 'Delete'], [authenticator.authenticate('jwt')]);
     }
 
-    public Index = (req: Request, res: Response): void => {
-        let promise: Promise<void>;
-
+    public Index = async (req: Request, res: Response): Promise<void> => {
         if (req.params.userId) {
-            promise = this.usersRepo
-                .findByPk(req.params.userId, { include: [this.categoriesRepo] })
-                .then((user: User) => {
-                    res.json(user?.subscriptions);
-                });
+            const user = await this.usersRepo.findByPk(req.params.userId, { include: [this.ticketCategoriesRepo] });
+            res.json(user?.subscriptions);
         } else if (req.params.categoryId) {
-            promise = this.categoriesRepo
-                .findByPk(req.params.categoryId, { include: [this.usersRepo] })
-                .then((ticket: TicketCategory) => {
-                    res.json(ticket?.subscribedUsers);
-                });
+            const ticketCategory = await this.ticketCategoriesRepo.findByPk(req.params.categoryId, {
+                include: [this.usersRepo],
+            });
+            res.json(ticketCategory?.subscribedUsers);
         }
-
-        promise.catch((err: any) => {
-            throw new Error(err);
-        });
     };
 
-    public Create = (req: Request, res: Response): void => {
-        try {
-            SubscriptionsController.ValidateRequest(req);
-        } catch (err) {
-            res.status(422).json(err);
-            return;
-        }
+    public Create = async (req: Request, res: Response): Promise<void> => {
+        SubscriptionsController.ValidateRequest(req);
 
-        this.subscriptionsRepo
-            .create({
-                userId: req.params.userId,
-                categoryId: req.params.categoryId,
-            })
-            .then((subscription: Subscription) => {
-                res.json(subscription);
-            })
-            .catch((err: any) => {
-                throw new Error(err);
-            });
+        const subscription = await this.subscriptionsRepo.create({
+            userId: req.params.userId,
+            categoryId: req.params.categoryId,
+        });
+        res.json(subscription);
     };
 
     public Delete = async (req: Request, res: Response): Promise<void> => {

@@ -19,18 +19,23 @@ class TicketCategoriesRoutes implements RoutesConfig {
             ticketCategoriesController.GetMiddleware('Index'),
             ticketCategoriesController.Index,
         );
+        expressApp.get(
+            '/tickets/categories/:ticketCategoryId',
+            ticketCategoriesController.GetMiddleware('Show'),
+            ticketCategoriesController.Show,
+        );
         expressApp.post(
             '/tickets/categories',
             ticketCategoriesController.GetMiddleware('Create'),
             ticketCategoriesController.Create,
         );
         expressApp.patch(
-            '/tickets/categories/:id/edit',
+            '/tickets/categories/:ticketCategoryId/edit',
             ticketCategoriesController.GetMiddleware('Update'),
             ticketCategoriesController.Update,
         );
         expressApp.delete(
-            '/tickets/categories/:id',
+            '/tickets/categories/:ticketCategoryId',
             ticketCategoriesController.GetMiddleware('Delete'),
             ticketCategoriesController.Delete,
         );

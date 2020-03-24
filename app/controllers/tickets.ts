@@ -35,7 +35,7 @@ export default class TicketsController extends Controller {
             ['Create'],
             [
                 check('description', 'Please provide a description.').isString(),
-                check('taggedCategoryIds', 'Please tag at least one category.').isArray({ min: 1 }),
+                check('ticketCategoryIds', 'Please tag at least one category id.').isArray({ min: 1 }),
             ],
         );
         // this.AddAuthentication(['Index', 'Create', 'Update', 'Delete'], [authenticator.authenticate('jwt')]);
@@ -107,10 +107,10 @@ export default class TicketsController extends Controller {
         const newTicket = await this.ticketsRepo.create({
             description: req.body.description,
         });
-        const categoryObjects = req.body.taggedCategoryIds.map((categoryId: number) => {
+        const categoryObjects = req.body.ticketCategoryIds.map((ticketCategoryId: number) => {
             return {
                 ticketId: newTicket.id,
-                categoryId,
+                categoryId: ticketCategoryId,
             };
         });
         this.categoryTagsRepo.bulkCreate(categoryObjects);
@@ -121,8 +121,10 @@ export default class TicketsController extends Controller {
         TicketsController.ValidateRequest(req);
 
         const ticket = await this.ticketsRepo.findByPk(req.params.ticketId);
-        ticket.name = '';
+        if (req.body.name) ticket.name = req.body.name;
+        if (req.body.description) ticket.description = req.body.description;
         await ticket.save();
+
         res.status(200).send();
     };
 

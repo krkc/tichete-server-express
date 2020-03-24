@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import express from 'express';
+import 'express-async-errors';
 import session from 'express-session';
 // import ejwt from 'express-jwt';
 import http from 'http';

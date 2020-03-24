@@ -20,7 +20,7 @@ class AssignmentRoutes implements RoutesConfig {
         );
 
         expressApp.post(
-            ['/users/:userId/assigned-tickets/:ticketId'],
+            ['/tickets/:ticketId/assigned-users/:userId', '/users/:userId/assigned-tickets/:ticketId'],
             assignmentsController.GetMiddleware('Create'),
             assignmentsController.Create,
         );

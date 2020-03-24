@@ -63,13 +63,13 @@ export default abstract class Controller {
      */
     protected static ValidateRequest(req: Request): void {
         const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            const errObj = {
-                error: 'Input Validation Error',
-                detail: errors.array(),
-                status: 422,
-            };
-            throw errObj;
-        }
+        if (errors.isEmpty()) return;
+
+        const errObj = {
+            error: 'Input Validation Error',
+            detail: errors.array(),
+            status: 422,
+        };
+        throw errObj;
     }
 }

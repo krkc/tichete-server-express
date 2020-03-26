@@ -89,7 +89,7 @@ export default class TicketsController extends Controller {
         const taggedCategoriesUrl = `${ticketUrl}/tagged-categories`;
         const ticketResource = new Resource(ticket.toJSON(), ticketUrl);
         ticketResource.link(`taggedCategories`, taggedCategoriesUrl);
-        ticketResource.link(`assignedUsers`, `${ticketUrl}/assigned-users`);
+        ticketResource.link(`assignedUsers`, `/users?assignedTicket=${ticket.id}`);
 
         const categoriesToAdd: Resource[] = [];
         ticket.taggedCategories.forEach(category => {

@@ -3,21 +3,23 @@ import { Request, Response } from 'express';
 import { check } from 'express-validator';
 import { Op, FindOptions } from 'sequelize';
 import { Repository } from 'sequelize-typescript';
+import passport = require('passport');
+import { Resource } from 'hal';
 
 import Database from 'db/database';
-import { Resource } from 'hal';
 import Controller from './controller';
 
 import User from '../models/user';
-
-import passport = require('passport');
+import Ticket from '../models/ticket';
 
 export default class UsersController extends Controller {
     private usersRepo: Repository<User>;
+    private ticketsRepo: Repository<Ticket>;
 
     constructor(database: Database, authenticator: passport.Authenticator, configuration: any) {
         super(database, authenticator, configuration);
         this.usersRepo = database.sequelize.getRepository(User);
+        this.ticketsRepo = database.sequelize.getRepository(Ticket);
 
         this.AddValidations(
             ['Create'],
@@ -34,7 +36,15 @@ export default class UsersController extends Controller {
     }
 
     public Index = async (req: Request, res: Response): Promise<void> => {
-        const users = await this.usersRepo.findAll();
+        const findOptions: FindOptions = {};
+        if (req.query.assignedTicket) {
+            findOptions.include = [{
+                as: 'assignedTickets',
+                model: this.ticketsRepo,
+                where: { id: req.query.assignedTicket }
+            }];
+        }
+        const users = await this.usersRepo.findAll(findOptions);
 
         const usersResource = new Resource({}, '/users');
         const usersToAdd: Resource[] = [];

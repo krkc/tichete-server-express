@@ -9,6 +9,8 @@ import Controller from './controller';
 import Assignment from '../models/assignment';
 import User from '../models/user';
 import Ticket from '../models/ticket';
+import { Resource } from 'hal';
+import { FindOptions, where } from 'sequelize/types';
 
 export default class AssignmentsController extends Controller {
     private assignmentsRepo: Repository<Assignment>;
@@ -34,15 +36,23 @@ export default class AssignmentsController extends Controller {
     }
 
     public Index = async (req: Request, res: Response): Promise<void> => {
-        if (req.params.userId) {
-            const user = await this.usersRepo.findByPk(req.params.userId, { include: ['assignedTickets'] });
-            res.json(user?.assignedTickets);
-        } else if (req.params.ticketId) {
-            const ticket = await this.ticketsRepo.findByPk(req.params.ticketId, {
-                include: ['assignees'],
-            });
-            res.json(ticket?.assignees);
+        let assignmentResources = new Resource({}, '/users/assignments');
+        const assignmentsToAdd: Resource[] = [];
+        const findOptions: FindOptions = {};
+        if (req.query.userId) {
+            findOptions.where = { userId: req.query.userId };
+        } else if (req.query.ticketId) {
+            findOptions.where = { ticketId: req.query.ticketId };
         }
+        const assignments: Assignment[] = await this.assignmentsRepo.findAll(findOptions);
+        assignments.forEach((assignment) => {            
+            const assignmentResource = new Resource(assignment.toJSON(), `/users/assignments/${assignment.id}`);
+            assignmentResource.link('assignedTicket', `/tickets/${assignment.ticketId}`);
+            assignmentResource.link('assignedUser', `/users/${assignment.userId}`);
+            assignmentsToAdd.push(assignmentResource);
+        });
+        assignmentResources.embed('assignments', assignmentsToAdd);
+        res.json(assignmentResources);
     };
 
     public Create = async (req: Request, res: Response): Promise<void> => {

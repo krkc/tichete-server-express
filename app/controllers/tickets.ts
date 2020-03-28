@@ -2,7 +2,7 @@
 import { Request, Response } from 'express';
 import { check } from 'express-validator';
 import { Repository } from 'sequelize-typescript';
-import { WhereOptions, Includeable } from 'sequelize/types';
+import { WhereOptions, Includeable, FindOptions } from 'sequelize/types';
 import { Resource } from 'hal';
 
 import Database from 'db/database';
@@ -45,13 +45,29 @@ export default class TicketsController extends Controller {
         // TODO: Handle query param '/tickets?categoryIds=1,3,6'
         // TODO: All these different query options will bloat this controller. Need solution.
         const whereOptions: WhereOptions = {};
+        const subscribedUsersIncludeOptions: Includeable[] = [];
+        const findOptions: FindOptions = {
+            where: whereOptions,
+            include: [
+                {
+                    as: 'taggedCategories',
+                    model: this.categoriesRepo,
+                    include: subscribedUsersIncludeOptions,
+                },
+            ],
+        };
+        if (req.query.assignedTicket) {
+            findOptions.include = [{
+                as: 'assignedTickets',
+                model: this.ticketsRepo,
+                where: { id: req.query.assignedTicket }
+            }];
+        }
         if (req.query.creatorId) {
             whereOptions.creatorId = req.query.creatorId;
         }
-
-        const includeOptions: Includeable[] = [];
         if (req.query.subscriberId) {
-            includeOptions.push({
+            subscribedUsersIncludeOptions.push({
                 as: 'subscribedUsers',
                 model: this.usersRepo,
                 through: {
@@ -60,16 +76,7 @@ export default class TicketsController extends Controller {
             });
         }
 
-        const tickets = await this.ticketsRepo.findAll({
-            where: whereOptions,
-            include: [
-                {
-                    as: 'taggedCategories',
-                    model: this.categoriesRepo,
-                    include: includeOptions,
-                },
-            ],
-        });
+        const tickets = await this.ticketsRepo.findAll(findOptions);
 
         const ticketsResource = new Resource({}, '/tickets');
         const ticketsToAdd: Resource[] = [];
@@ -120,10 +127,35 @@ export default class TicketsController extends Controller {
     public Update = async (req: Request, res: Response): Promise<void> => {
         TicketsController.ValidateRequest(req);
 
-        const ticket = await this.ticketsRepo.findByPk(req.params.ticketId);
-        if (req.body.name) ticket.name = req.body.name;
-        if (req.body.description) ticket.description = req.body.description;
+        const ticket = this.ticketsRepo.build(req.body, { isNewRecord: false });
         await ticket.save();
+
+        const delta: { creates: any[], destroyIds: number[]} = {
+            creates: [] as Tag[],
+            destroyIds: [] as number[]
+        };
+        const categoryTagsMap = (await this.categoryTagsRepo.findAll({ where: { ticketId: ticket.id } }))
+        .reduce((acc: any,tag: Tag) => {
+            acc[tag.categoryId] = tag.id;
+            return acc;
+        }, {});
+        const categoriesToTagMap = req.body.taggedCategories.reduce((acc: any, ticketCategory: TicketCategory) => {
+            acc[ticketCategory.id] = { ticketId: ticket.id, categoryId: ticketCategory.id };
+            return acc;
+        }, {});
+        for (const key of Object.keys(categoriesToTagMap)) {
+            if (!categoryTagsMap[key]) {
+                delta.creates.push(categoriesToTagMap[key]);
+            }
+        }
+        for (const key of Object.keys(categoryTagsMap)) {
+            if (!categoriesToTagMap[key]) {
+                delta.destroyIds.push(categoryTagsMap[key]);
+            }
+        }
+
+        await this.categoryTagsRepo.bulkCreate(delta.creates);
+        await this.categoryTagsRepo.destroy({ where: { id: delta.destroyIds } });        
 
         res.status(200).send();
     };

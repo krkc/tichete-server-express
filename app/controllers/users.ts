@@ -62,7 +62,7 @@ export default class UsersController extends Controller {
 
         const userResource = new Resource(user.toJSON(), `/users/${user.id}`);
         userResource.link('submittedTickets', `/tickets?creatorId=${user.id}`);
-        userResource.link('assignedTickets', `/users/${user.id}/assigned-tickets`);
+        userResource.link(`assignedTickets`, `/tickets?assignedUser=${user.id}`);
         userResource.link('subscribedCategories', `/users/${user.id}/subscribed-categories`);
         userResource.link('subscribedTickets', `/tickets?subscriberId=${user.id}`);
         res.json(userResource);

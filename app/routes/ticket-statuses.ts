@@ -30,7 +30,7 @@ class TicketStatusesRoutes implements RoutesConfig {
             ticketStatusesController.Create,
         );
         expressApp.patch(
-            '/tickets/statuses/:ticketStatusId/edit',
+            '/tickets/statuses/:ticketStatusId',
             ticketStatusesController.GetMiddleware('Update'),
             ticketStatusesController.Update,
         );

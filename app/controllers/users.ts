@@ -3,7 +3,6 @@ import { Request, Response } from 'express';
 import { check } from 'express-validator';
 import { Op, FindOptions } from 'sequelize';
 import { Repository } from 'sequelize-typescript';
-import passport = require('passport');
 import { Resource } from 'hal';
 
 import Database from 'db/database';
@@ -12,8 +11,11 @@ import Controller from './controller';
 import User from '../models/user';
 import Ticket from '../models/ticket';
 
+import passport = require('passport');
+
 export default class UsersController extends Controller {
     private usersRepo: Repository<User>;
+
     private ticketsRepo: Repository<Ticket>;
 
     constructor(database: Database, authenticator: passport.Authenticator, configuration: any) {
@@ -38,11 +40,13 @@ export default class UsersController extends Controller {
     public Index = async (req: Request, res: Response): Promise<void> => {
         const findOptions: FindOptions = {};
         if (req.query.assignedTicket) {
-            findOptions.include = [{
-                as: 'assignedTickets',
-                model: this.ticketsRepo,
-                where: { id: req.query.assignedTicket }
-            }];
+            findOptions.include = [
+                {
+                    as: 'assignedTickets',
+                    model: this.ticketsRepo,
+                    where: { id: req.query.assignedTicket },
+                },
+            ];
         }
         const users = await this.usersRepo.findAll(findOptions);
 

@@ -30,7 +30,7 @@ class TicketCategoriesRoutes implements RoutesConfig {
             ticketCategoriesController.Create,
         );
         expressApp.patch(
-            '/tickets/categories/:ticketCategoryId/edit',
+            '/tickets/categories/:ticketCategoryId',
             ticketCategoriesController.GetMiddleware('Update'),
             ticketCategoriesController.Update,
         );

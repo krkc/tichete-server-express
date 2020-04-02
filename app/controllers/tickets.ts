@@ -57,11 +57,13 @@ export default class TicketsController extends Controller {
             ],
         };
         if (req.query.assignedTicket) {
-            findOptions.include = [{
-                as: 'assignedTickets',
-                model: this.ticketsRepo,
-                where: { id: req.query.assignedTicket }
-            }];
+            findOptions.include = [
+                {
+                    as: 'assignedTickets',
+                    model: this.ticketsRepo,
+                    where: { id: req.query.assignedTicket },
+                },
+            ];
         }
         if (req.query.creatorId) {
             whereOptions.creatorId = req.query.creatorId;
@@ -130,32 +132,34 @@ export default class TicketsController extends Controller {
         const ticket = this.ticketsRepo.build(req.body, { isNewRecord: false });
         await ticket.save();
 
-        const delta: { creates: any[], destroyIds: number[]} = {
+        const delta: { creates: any[]; destroyIds: number[] } = {
             creates: [] as Tag[],
-            destroyIds: [] as number[]
+            destroyIds: [] as number[],
         };
-        const categoryTagsMap = (await this.categoryTagsRepo.findAll({ where: { ticketId: ticket.id } }))
-        .reduce((acc: any,tag: Tag) => {
-            acc[tag.categoryId] = tag.id;
-            return acc;
-        }, {});
+        const categoryTagsMap = (await this.categoryTagsRepo.findAll({ where: { ticketId: ticket.id } })).reduce(
+            (acc: any, tag: Tag) => {
+                acc[tag.categoryId] = tag.id;
+                return acc;
+            },
+            {},
+        );
         const categoriesToTagMap = req.body.taggedCategories.reduce((acc: any, ticketCategory: TicketCategory) => {
             acc[ticketCategory.id] = { ticketId: ticket.id, categoryId: ticketCategory.id };
             return acc;
         }, {});
-        for (const key of Object.keys(categoriesToTagMap)) {
+        Object.keys(categoriesToTagMap).forEach(key => {
             if (!categoryTagsMap[key]) {
                 delta.creates.push(categoriesToTagMap[key]);
             }
-        }
-        for (const key of Object.keys(categoryTagsMap)) {
+        });
+        Object.keys(categoryTagsMap).forEach(key => {
             if (!categoriesToTagMap[key]) {
                 delta.destroyIds.push(categoryTagsMap[key]);
             }
-        }
+        });
 
         await this.categoryTagsRepo.bulkCreate(delta.creates);
-        await this.categoryTagsRepo.destroy({ where: { id: delta.destroyIds } });        
+        await this.categoryTagsRepo.destroy({ where: { id: delta.destroyIds } });
 
         res.status(200).send();
     };

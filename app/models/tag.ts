@@ -8,7 +8,7 @@ export default class Tag extends Model<Tag> {
     @PrimaryKey
     @Column
     id: number;
-    
+
     @ForeignKey(() => TicketCategory)
     @Column
     categoryId: number;

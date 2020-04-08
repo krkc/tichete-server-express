@@ -8,6 +8,7 @@ import { Resource } from 'hal';
 import Database from 'db/database';
 import Controller from './controller';
 import User from '../models/user';
+import FormattedError from '../base/formatted-error';
 
 export default class AuthController extends Controller {
     private usersRepo: Repository<User>;
@@ -99,18 +100,19 @@ export default class AuthController extends Controller {
     private handleLoginErrors = (err: any, req: Request, res: Response, next: any) => {
         if (!err) return;
 
-        const errObj = {
-            name: err.name,
-            message: err.message,
-            status: err.status,
-        };
+        const error = new FormattedError(
+            err.message,
+            err.name,
+            null,
+            err.status
+        );
 
-        if (errObj.status === 400) {
-            errObj.message = err.message.concat(' - Missing credentials');
-        } else if (errObj.status === 401) {
-            errObj.message = err.message.concat(' - Invalid credentials');
+        if (error.status === 400) {
+            error.message = err.message.concat(' - Missing credentials');
+        } else if (error.status === 401) {
+            error.message = err.message.concat(' - Invalid credentials');
         }
 
-        next(errObj);
+        next(error);
     };
 }

@@ -3,6 +3,7 @@ import { ValidationChain, validationResult } from 'express-validator';
 
 import Database from 'db/database';
 import passport from 'passport';
+import FormattedError from '../base/formatted-error';
 
 export default abstract class Controller {
     protected Middleware: any = { Validations: {}, Authentication: {} };
@@ -65,11 +66,12 @@ export default abstract class Controller {
         const errors = validationResult(req);
         if (errors.isEmpty()) return;
 
-        const errObj = {
-            error: 'Input Validation Error',
-            detail: errors.array(),
-            status: 422,
-        };
-        throw errObj;
+        const error = new FormattedError(
+            errors.array().reduce((acc,cv) => acc.concat(cv.msg + ' '),''),
+            'Input Validation Error',
+            errors.array(),
+            422,
+        );
+        throw error;
     }
 }

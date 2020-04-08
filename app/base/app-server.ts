@@ -81,6 +81,9 @@ export default class AppServer {
         res.status(err.status || 500);
         if (err.status) {
             res.json(error);
+            if (err.internalData) {
+                throw err;
+            }
         } else {
             res.send();
             throw err;
